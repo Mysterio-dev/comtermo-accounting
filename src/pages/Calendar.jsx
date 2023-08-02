@@ -326,33 +326,9 @@ const App = () => {
   };
 
   // Обновленная функция cellRender: Отображает данные в ячейке календаря (подсвечивает события для выбранной даты).
-  // const cellRender = (value) => {
-  //   const date = value.format("YYYY-MM-DD");
-  //   const events = calendarData[date];
-  //   return (
-  //     <div>
-  //       {events && events.length > 0 ? (
-  //         <ul className="events">
-  //           {events.map((event, index) => (
-  //             <li key={index}>
-  //               <Badge
-  //                 status="success"
-  //                 color={getColorByIndex(index)}
-  //                 text={event.content}
-  //               />
-  //             </li>
-  //           ))}
-  //         </ul>
-  //       ) : null}
-  //     </div>
-  //   );
-  // };
-
-
   const cellRender = (value) => {
     const date = value.format("YYYY-MM-DD");
     const events = calendarData[date];
-  
     return (
       <div>
         {events && events.length > 0 ? (
@@ -361,7 +337,7 @@ const App = () => {
               <li key={index}>
                 <Badge
                   status="success"
-                  color={getColorByIndex(index)} // Используем индекс для выбора цвета
+                  color={getColorByIndex(index)}
                   text={event.content}
                 />
               </li>
@@ -371,6 +347,30 @@ const App = () => {
       </div>
     );
   };
+
+
+  // const cellRender = (value) => {
+  //   const date = value.format("YYYY-MM-DD");
+  //   const events = calendarData[date];
+  
+  //   return (
+  //     <div>
+  //       {events && events.length > 0 ? (
+  //         <ul className="events">
+  //           {events.map((event, index) => (
+  //             <li key={index}>
+  //               <Badge
+  //                 status="success"
+  //                 color={getColorByIndex(index)} // Используем индекс для выбора цвета
+  //                 text={event.content}
+  //               />
+  //             </li>
+  //           ))}
+  //         </ul>
+  //       ) : null}
+  //     </div>
+  //   );
+  // };
   
   
   
