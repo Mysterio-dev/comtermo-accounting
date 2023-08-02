@@ -1,0 +1,146 @@
+#tsparticles {
+  position: absolute;
+  top: 0;
+  z-index: -1;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  bottom: 0;
+}
+
+.header {
+display: flex;
+align-items: center;
+background-color: #fff;
+padding: 0 10px;
+box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90%) 0px 0px 0px 1px;
+
+&__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+
+  h3 {
+    font-weight: 500;
+    padding: 0;
+    margin: 0;
+  }
+
+  span {
+    font-weight: 400;
+  }
+
+  img {
+    height: 32px;
+    max-width: 32px;
+  }
+
+  
+}
+}
+
+.avatar-menu {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.content {
+  padding: 10px;
+}
+
+
+.footer {
+  background-color: #fff;
+  text-align: center;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgba(234, 234, 234, 0.9) 0px 0px 0px 1px;
+}
+
+.events {
+  padding-left: 0;
+  margin: 0;
+
+  li {
+    list-style: none;
+
+    &:not(:last-child) {
+      margin-bottom: 2px;
+    }
+  }
+
+}
+
+
+.ant-radio-group {
+  display: none;
+}
+
+.wrapper {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.wrapper>main {
+  flex: 1 1 auto;
+}
+
+.сalendar-wrapper {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90%) 0px 0px 0px 1px;
+  height: 100%;
+}
+
+.table-wrapper {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90%) 0px 0px 0px 1px;
+  height: 100%;
+}
+
+
+.authContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  &__wrap {
+    max-width: 300px;
+    width: 100%;
+    border: 1px solid #f0f0f0;
+    padding: 30px;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  &__title {
+    text-align: center;
+    margin: 0;
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-size: 19px;
+
+    span {
+    font-weight: 400;
+    }
+  }
+
+}
+
+
+.authContainer__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+
+  img {
+    max-width: 55px;
+  }
+}
