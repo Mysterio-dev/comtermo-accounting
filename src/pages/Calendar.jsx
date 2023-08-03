@@ -14,6 +14,7 @@ import {
   Layout,
   Typography,
 } from "antd";
+import { getAuth, signOut } from "firebase/auth";
 const { Header, Footer, Content } = Layout; // Деструктурируйте компоненты Layout
 const { Text } = Typography;
 import { Col, Row } from "antd";
@@ -50,6 +51,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const App = () => {
+
   // Получаем текущий год
   const currentYear = new Date().getFullYear();
 
@@ -94,7 +96,20 @@ const App = () => {
   ];
 
   // Определение массива фиксированных цветов
-  const colors = [ "#3399FF", "#00CC00", "#9933FF", "#FF3333", "#FFFF33", "#99CCFF", "#FF8000", "#33FFFF",   "#4C0099", "#FFCCFF", "#FFE5CC", "#99004C"];
+  const colors = [
+    "#3399FF",
+    "#00CC00",
+    "#9933FF",
+    "#FF3333",
+    "#FFFF33",
+    "#99CCFF",
+    "#FF8000",
+    "#33FFFF",
+    "#4C0099",
+    "#FFCCFF",
+    "#FFE5CC",
+    "#99004C",
+  ];
 
   // Функция getColorByIndex: Возвращает цвет на основе индекса в массиве цветов.
   const getColorByIndex = (index) => {
@@ -148,7 +163,7 @@ const App = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [shownNotifications, setShownNotifications] = useState([]);
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleDelete = async (eventId) => {
     try {
@@ -274,7 +289,6 @@ const App = () => {
           console.log("Данные успешно записаны в Firestore");
           // Записываем уведомление о начале события
           addNotificationToFirestore(eventId, inputValue, date, true);
-
         })
         .catch((error) => {
           console.error("Ошибка при записи данных в Firestore:", error);
@@ -349,38 +363,12 @@ const App = () => {
   };
 
 
-  // const cellRender = (value) => {
-  //   const date = value.format("YYYY-MM-DD");
-  //   const events = calendarData[date];
-  
-  //   return (
-  //     <div>
-  //       {events && events.length > 0 ? (
-  //         <ul className="events">
-  //           {events.map((event, index) => (
-  //             <li key={index}>
-  //               <Badge
-  //                 status="success"
-  //                 color={getColorByIndex(index)} // Используем индекс для выбора цвета
-  //                 text={event.content}
-  //               />
-  //             </li>
-  //           ))}
-  //         </ul>
-  //       ) : null}
-  //     </div>
-  //   );
-  // };
-  
-  
-  
-
   useEffect(() => {
     // Получаем текущую дату
     const currentDate = moment();
     // Устанавливаем месяц текущей даты в состояние currentMonth
     setCurrentMonth(currentDate.month());
-  
+
     // Функция для загрузки данных календаря и таблицы из Firestore
     const loadCalendarAndTableData = async () => {
       try {
@@ -392,7 +380,7 @@ const App = () => {
           newCalendarData[doc.id] = doc.data().events;
         });
         setCalendarData(newCalendarData);
-  
+
         // Загрузка данных таблицы из Firestore
         const tableDataRef = collection(db, "tableData");
         const tableDataSnapshot = await getDocs(tableDataRef);
@@ -411,17 +399,17 @@ const App = () => {
         console.error("Ошибка при загрузке данных из Firestore:", error);
       }
     };
-  
+
     loadCalendarAndTableData(); // Загружаем данные при монтировании компонента
-  
+
     // Обработка уведомлений в зависимости от tableData
     tableData.forEach((event) => {
       const endDate = moment(event.tableEnd);
       const currentDate = moment();
-      
+
       // Уведомление в течение 7 дней до окончания события и только если не показано ранее
       if (
-        endDate.diff(currentDate, "days") >= 0 && 
+        endDate.diff(currentDate, "days") >= 0 &&
         endDate.diff(currentDate, "days") <= 7 &&
         !shownNotifications.includes(event.eventId)
       ) {
@@ -432,16 +420,15 @@ const App = () => {
         ]);
       }
     });
-  
   }, []);
-  
+
   // Второй useEffect остается как есть
   useEffect(() => {
     const currentDate = moment();
     tableData.forEach((event) => {
       const endDate = moment(event.tableEnd);
       if (
-        endDate.diff(currentDate, "days") >= 0 && 
+        endDate.diff(currentDate, "days") >= 0 &&
         endDate.diff(currentDate, "days") <= 7 &&
         !shownNotifications.includes(event.eventId)
       ) {
@@ -455,13 +442,12 @@ const App = () => {
     });
   }, [tableData]);
 
-
   const addNotificationToFirestore = async (eventId, content, date) => {
     try {
       const endDate = moment(date);
       const currentDate = moment();
       const diffInDays = endDate.diff(currentDate, "days");
-  
+
       // Записываем уведомление только для событий, которые заканчиваются в течение 7 дней
       if (diffInDays > 0 && diffInDays <= 7) {
         const notificationRef = doc(db, "notifications", `${date}-end`);
@@ -476,17 +462,17 @@ const App = () => {
       console.error("Ошибка при записи уведомления в Firestore:", error);
     }
   };
-  
+
   const showNotification = (content, date) => {
     const currentDate = moment();
     const targetDate = moment(date);
     const diffInDays = targetDate.diff(currentDate, "days");
-  
+
     const messagePrefix = "Осталось до окончания";
     const daysString = declOfDays(diffInDays);
-  
+
     const notificationMessage = `${messagePrefix} ${diffInDays} ${daysString} события "${content}"`;
-  
+
     notification.warning({
       message: "Предстоящее событие",
       description: notificationMessage,
@@ -494,17 +480,14 @@ const App = () => {
       placement: "topLeft",
     });
   };
-  
 
-  
-  
   // Вспомогательная функция для склонения слова "день"
   const declOfDays = (days) => {
     const cases = [2, 0, 1, 1, 1, 2];
     const titles = ["день", "дня", "дней"];
     const dayString = days.toString();
     const lastDigit = Number(dayString.slice(-1));
-  
+
     if (lastDigit === 1) {
       return titles[0]; // "день"
     } else if (lastDigit >= 2 && lastDigit <= 4) {
@@ -513,7 +496,6 @@ const App = () => {
       return titles[2]; // "дней"
     }
   };
-  
 
   return (
     <ConfigProvider locale={ruRU}>
@@ -536,8 +518,9 @@ const App = () => {
                   cellRender={cellRender}
                 />
                 <Modal
-                  title={`Запись на ${selectedDate ? selectedDate.format("DD/MM/YYYY") : ""
-                    }`}
+                  title={`Запись на ${
+                    selectedDate ? selectedDate.format("DD/MM/YYYY") : ""
+                  }`}
                   centered
                   visible={isModalVisible}
                   onOk={handleModalOk}
@@ -552,9 +535,7 @@ const App = () => {
               </div>
             </Col>
             <Col span={9}>
-              
               <div className="table-wrapper">
-                
                 <Table
                   rowSelection={{
                     selectedRowKeys,

@@ -1,6 +1,7 @@
 import {useState} from "react";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthComponent from './AuthComponent';
+import ParticlesContainer from "./ParticlesContainer"; 
 import Calendar from './pages/Calendar';
 import './App.scss';
 
@@ -30,7 +31,9 @@ function App() {
           </Routes>
         ) : (
           <AuthComponent firebase={app} setIsLoggedIn={setIsLoggedIn} />
+          
         )}
+            <ParticlesContainer />
       </main>
     </BrowserRouter>
   );

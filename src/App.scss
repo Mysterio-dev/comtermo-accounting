@@ -80,7 +80,7 @@ box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 
 .wrapper>main {
