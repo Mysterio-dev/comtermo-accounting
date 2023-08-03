@@ -499,7 +499,7 @@ const App = () => {
 
   return (
     <ConfigProvider locale={ruRU}>
-      <Layout>
+      <Layout style={{ minHeight: "100vh" }}>
         <Header className="header">
           <div className="header__logo">
             <img src={logoImage} alt="Логотип" />
