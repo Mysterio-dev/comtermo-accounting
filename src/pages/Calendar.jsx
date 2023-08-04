@@ -17,6 +17,7 @@ import {
 import { getAuth, signOut } from "firebase/auth";
 const { Header, Footer, Content } = Layout; // Деструктурируйте компоненты Layout
 const { Text } = Typography;
+import { MinusCircleOutlined, PlusCircleOutlined  } from '@ant-design/icons';
 import { Col, Row } from "antd";
 import moment from "moment";
 import "moment/locale/ru";
@@ -24,6 +25,7 @@ import ruRU from "antd/locale/ru_RU";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import logoImage from "../assets/logo.png";
+
 
 import { initializeApp } from "firebase/app";
 import {
@@ -65,13 +67,14 @@ const App = () => {
       dataIndex: "tableStart",
       sorter: (a, b) =>
         moment(a.tableStart).unix() - moment(b.tableStart).unix(),
-      render: (text) => <Tag color="blue">{text}</Tag>,
+      render: (text) => <div className="tableValue"><MinusCircleOutlined style={{ marginRight: 8, color: "#ff4d4f" }} />{text}</div> ,
+      
     },
     {
       title: "Конец",
       dataIndex: "tableEnd",
       sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
-      render: (text) => <Tag color="green">{text}</Tag>,
+      render: (text) => <div className="tableValue"><PlusCircleOutlined style={{ marginRight: 8, color: 'rgb(66 204 8)' }} />{text}</div>,
     },
     {
       title: "Содержание",
@@ -87,7 +90,7 @@ const App = () => {
           okText="Да"
           cancelText="Отмена"
         >
-          <Button type="text" danger>
+          <Button type="primary"  size="small" danger>
             Удалить
           </Button>
         </Popconfirm>
@@ -362,6 +365,8 @@ const App = () => {
     );
   };
 
+  
+
 
   useEffect(() => {
     // Получаем текущую дату
@@ -441,6 +446,11 @@ const App = () => {
       }
     });
   }, [tableData]);
+
+
+
+
+
 
   const addNotificationToFirestore = async (eventId, content, date) => {
     try {
@@ -537,10 +547,10 @@ const App = () => {
             <Col span={9}>
               <div className="table-wrapper">
                 <Table
-                  rowSelection={{
-                    selectedRowKeys,
-                    onChange: onSelectChange,
-                  }}
+                  // rowSelection={{
+                  //   selectedRowKeys,
+                  //   onChange: onSelectChange,
+                  // }}
                   columns={columns}
                   dataSource={tableData.map((item, index) => ({
                     ...item,
