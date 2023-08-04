@@ -460,9 +460,9 @@ const App = () => {
             {events.map((event, index) => (
               <li key={index}>
                 {event.isCloned ? (
-                  <PlusCircleOutlined style={{ color: '#02aaff', marginRight: 8 }} /> // Иконка плюса для клонированного события
+                  <PlusCircleOutlined style={{ color: 'rgb(255 95 97)', marginRight: 8 }} /> // Иконка плюса для клонированного события
                 ) : (
-                  <MinusCircleOutlined style={{ color: "rgb(255 95 97)", marginRight: 8 }} />
+                  <MinusCircleOutlined style={{ color: "#02aaff", marginRight: 8 }} />
                 )}
                 <span>{event.content}</span>
               </li>
