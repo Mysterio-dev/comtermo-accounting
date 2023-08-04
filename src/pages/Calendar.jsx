@@ -17,7 +17,7 @@ import {
 import { getAuth, signOut } from "firebase/auth";
 const { Header, Footer, Content } = Layout; // Деструктурируйте компоненты Layout
 const { Text } = Typography;
-import { MinusCircleOutlined, PlusCircleOutlined  } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { Col, Row } from "antd";
 import moment from "moment";
 import "moment/locale/ru";
@@ -25,7 +25,6 @@ import ruRU from "antd/locale/ru_RU";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import logoImage from "../assets/logo.png";
-
 
 import { initializeApp } from "firebase/app";
 import {
@@ -63,18 +62,31 @@ const App = () => {
   // Задаются колонки для таблицы.
   const columns = [
     {
+      title: "",
+      render: (text, record, index) => index + 1,
+    },
+    {
       title: "Начало",
       dataIndex: "tableStart",
       sorter: (a, b) =>
         moment(a.tableStart).unix() - moment(b.tableStart).unix(),
-      render: (text) => <div className="tableValue"><MinusCircleOutlined style={{ marginRight: 8, color: "#ff4d4f" }} />{text}</div> ,
-      
+      render: (text) => (
+        <div className="tableValue">
+          <MinusCircleOutlined style={{ marginRight: 8, color: "#02aaff" }} />
+          {text}
+        </div>
+      ),
     },
     {
       title: "Конец",
       dataIndex: "tableEnd",
       sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
-      render: (text) => <div className="tableValue"><PlusCircleOutlined style={{ marginRight: 8, color: 'rgb(66 204 8)' }} />{text}</div>,
+      render: (text) => (
+        <div className="tableValue">
+          <PlusCircleOutlined style={{ marginRight: 8, color: 'rgb(255 95 97)' }} />
+          {text}
+        </div>
+      ),
     },
     {
       title: "Содержание",
@@ -90,13 +102,14 @@ const App = () => {
           okText="Да"
           cancelText="Отмена"
         >
-          <Button type="primary"  size="small" danger>
+          <Button type="primary" size="small" danger>
             Удалить
           </Button>
         </Popconfirm>
       ),
     },
   ];
+  
 
   // Определение массива фиксированных цветов
   const colors = [
@@ -266,6 +279,62 @@ const App = () => {
   };
 
   // Обработчик нажатия кнопки "ОК" в модальном окне (handleModalOk): Записывает введенное значение в Firebase, обновляет состояние календаря, добавляет уведомление, очищает поле ввода, скрывает модальное окно и обновляет состояние таблицы
+  // const handleModalOk = () => {
+  //   if (inputValue.trim() !== "") {
+  //     const eventId = Date.now().toString();
+  //     const date = selectedDate.format("YYYY-MM-DD");
+  //     const eventsForDate = calendarData[date]
+  //       ? [...calendarData[date], { eventId, content: inputValue }]
+  //       : [{ eventId, content: inputValue }];
+  //     const nextDate = selectedDate
+  //       .clone()
+  //       .add(30, "days")
+  //       .format("YYYY-MM-DD");
+
+  //     // Записываем данные в Firestore и обрабатываем успешное выполнение
+  //     Promise.all([
+  //       setDoc(doc(db, "calendarEvents", date), { events: eventsForDate }),
+  //       setDoc(doc(db, "calendarEvents", nextDate), { events: eventsForDate }),
+  //       setDoc(doc(db, "tableData", eventId), {
+  //         startDate: date,
+  //         endDate: nextDate,
+  //         content: inputValue,
+  //       }),
+  //     ])
+  //       .then(() => {
+  //         console.log("Данные успешно записаны в Firestore");
+  //         // Записываем уведомление о начале события
+  //         addNotificationToFirestore(eventId, inputValue, date, true);
+  //       })
+  //       .catch((error) => {
+  //         console.error("Ошибка при записи данных в Firestore:", error);
+  //         message.error("Ошибка при записи данных в Firestore");
+  //       });
+
+  //     setCalendarData((prevData) => ({
+  //       ...prevData,
+  //       [date]: [...(prevData[date] || []), { eventId, content: inputValue }],
+  //       [nextDate]: [
+  //         ...(prevData[nextDate] || []),
+  //         { eventId, content: inputValue },
+  //       ],
+  //     }));
+
+  //     setTableData((prevData) => [
+  //       ...prevData,
+  //       {
+  //         tableStart: date,
+  //         tableEnd: nextDate,
+  //         tableContent: inputValue,
+  //         eventId, // Используем один и тот же идентификатор для события в таблице
+  //       },
+  //     ]);
+  //     message.success("Данные успешно добавлены!");
+  //   }
+  //   setInputValue("");
+  //   setIsModalVisible(false);
+  // };
+
   const handleModalOk = () => {
     if (inputValue.trim() !== "") {
       const eventId = Date.now().toString();
@@ -273,11 +342,8 @@ const App = () => {
       const eventsForDate = calendarData[date]
         ? [...calendarData[date], { eventId, content: inputValue }]
         : [{ eventId, content: inputValue }];
-      const nextDate = selectedDate
-        .clone()
-        .add(30, "days")
-        .format("YYYY-MM-DD");
-
+      const nextDate = selectedDate.clone().add(30, "days").format("YYYY-MM-DD");
+  
       // Записываем данные в Firestore и обрабатываем успешное выполнение
       Promise.all([
         setDoc(doc(db, "calendarEvents", date), { events: eventsForDate }),
@@ -297,16 +363,17 @@ const App = () => {
           console.error("Ошибка при записи данных в Firestore:", error);
           message.error("Ошибка при записи данных в Firestore");
         });
-
-      setCalendarData((prevData) => ({
-        ...prevData,
-        [date]: [...(prevData[date] || []), { eventId, content: inputValue }],
-        [nextDate]: [
-          ...(prevData[nextDate] || []),
-          { eventId, content: inputValue },
-        ],
-      }));
-
+  
+        setCalendarData((prevData) => ({
+          ...prevData,
+          [date]: [...(prevData[date] || []), { eventId, content: inputValue }],
+          [nextDate]: [
+            ...(prevData[nextDate] || []),
+            { eventId, content: inputValue, isCloned: true }, // Установите isCloned в true при клонировании
+          ],
+        }));
+        
+  
       setTableData((prevData) => [
         ...prevData,
         {
@@ -314,6 +381,7 @@ const App = () => {
           tableEnd: nextDate,
           tableContent: inputValue,
           eventId, // Используем один и тот же идентификатор для события в таблице
+         
         },
       ]);
       message.success("Данные успешно добавлены!");
@@ -321,15 +389,7 @@ const App = () => {
     setInputValue("");
     setIsModalVisible(false);
   };
-
-  const onSelectChange = (selectedRowKeys) => {
-    setSelectedRowKeys(selectedRowKeys);
-  };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
+  
 
   // Обработчик закрытия модального окна (handleModalCancel): Очищает поле ввода и скрывает модальное окно.
   const handleModalCancel = () => {
@@ -343,6 +403,53 @@ const App = () => {
   };
 
   // Обновленная функция cellRender: Отображает данные в ячейке календаря (подсвечивает события для выбранной даты).
+  // const cellRender = (value) => {
+  //   const date = value.format("YYYY-MM-DD");
+  //   const events = calendarData[date];
+  //   return (
+  //     <div>
+  //       {events && events.length > 0 ? (
+  //         <ul className="events">
+  //           {events.map((event, index) => (
+  //             <li key={index}>
+  //               <Badge
+  //                 status="success"
+  //                 color={getColorByIndex(index)}
+  //                 text={event.content}
+  //               />
+  //             </li>
+  //           ))}
+  //         </ul>
+  //       ) : null}
+  //     </div>
+  //   );
+  // };
+
+
+
+  // const cellRender = (value) => {
+  //   const date = value.format("YYYY-MM-DD");
+  //   const events = calendarData[date];
+  //   return (
+  //     <div>
+  //       {events && events.length > 0 ? (
+  //         <ul className="events">
+  //           {events.map((event, index) => (
+  //             <li key={index}>
+  //               <MinusCircleOutlined
+  //                 style={{ color: "#ff4d4f", marginRight: 8 }}
+  //               />
+  //               <span>
+  //                 {event.content}
+  //               </span>
+  //             </li>
+  //           ))}
+  //         </ul>
+  //       ) : null}
+  //     </div>
+  //   );
+  // };
+
   const cellRender = (value) => {
     const date = value.format("YYYY-MM-DD");
     const events = calendarData[date];
@@ -352,11 +459,12 @@ const App = () => {
           <ul className="events">
             {events.map((event, index) => (
               <li key={index}>
-                <Badge
-                  status="success"
-                  color={getColorByIndex(index)}
-                  text={event.content}
-                />
+                {event.isCloned ? (
+                  <PlusCircleOutlined style={{ color: '#02aaff', marginRight: 8 }} /> // Иконка плюса для клонированного события
+                ) : (
+                  <MinusCircleOutlined style={{ color: "rgb(255 95 97)", marginRight: 8 }} />
+                )}
+                <span>{event.content}</span>
               </li>
             ))}
           </ul>
@@ -364,10 +472,10 @@ const App = () => {
       </div>
     );
   };
-
   
-
-
+  
+ 
+  
   useEffect(() => {
     // Получаем текущую дату
     const currentDate = moment();
@@ -447,11 +555,6 @@ const App = () => {
     });
   }, [tableData]);
 
-
-
-
-
-
   const addNotificationToFirestore = async (eventId, content, date) => {
     try {
       const endDate = moment(date);
@@ -526,11 +629,11 @@ const App = () => {
                   onPanelChange={onPanelChange}
                   onSelect={onSelect}
                   cellRender={cellRender}
+                 
                 />
                 <Modal
-                  title={`Запись на ${
-                    selectedDate ? selectedDate.format("DD/MM/YYYY") : ""
-                  }`}
+                  title={`Запись на ${selectedDate ? selectedDate.format("DD/MM/YYYY") : ""
+                    }`}
                   centered
                   visible={isModalVisible}
                   onOk={handleModalOk}
@@ -545,20 +648,16 @@ const App = () => {
               </div>
             </Col>
             <Col span={9}>
-              <div className="table-wrapper">
-                <Table
-                  // rowSelection={{
-                  //   selectedRowKeys,
-                  //   onChange: onSelectChange,
-                  // }}
-                  columns={columns}
-                  dataSource={tableData.map((item, index) => ({
-                    ...item,
-                    key: item.tableStart + index,
-                  }))}
-                />
-              </div>
-            </Col>
+  <div className="table-wrapper">
+    <Table
+      columns={columns}
+      dataSource={tableData.map((item, index) => ({
+        ...item,
+        key: item.tableStart + index,
+      }))}
+    />
+  </div>
+</Col>
           </Row>
         </Content>
         <Footer className="footer">
