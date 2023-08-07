@@ -66,7 +66,7 @@ const App = () => {
       render: (text, record, index) => index + 1,
     },
     {
-      title: "Начало",
+      title: "Дата взятия",
       dataIndex: "tableStart",
       sorter: (a, b) =>
         moment(a.tableStart).unix() - moment(b.tableStart).unix(),
@@ -78,7 +78,7 @@ const App = () => {
       ),
     },
     {
-      title: "Конец",
+      title: "Дата погашения",
       dataIndex: "tableEnd",
       sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
       render: (text) => (
@@ -89,11 +89,11 @@ const App = () => {
       ),
     },
     {
-      title: "Содержание",
+      title: "Текст",
       dataIndex: "tableContent",
     },
     {
-      title: "Управление",
+      title: "Действие",
       dataIndex: "tableControl",
       render: (_, record) => (
         <Popconfirm
@@ -255,8 +255,14 @@ const App = () => {
       const calendarDataSnapshot = await getDocs(calendarDataRef);
       const newCalendarData = {};
       calendarDataSnapshot.forEach((doc) => {
-        newCalendarData[doc.id] = doc.data().events;
-      });
+        newCalendarData[doc.id] = doc.data().events.map(event => {
+            return {
+                ...event,
+                isCloned: event.isCloned || false
+            };
+        });
+    });
+
       setCalendarData(newCalendarData);
 
       // Загрузка данных таблицы из Firestore
@@ -347,7 +353,12 @@ const App = () => {
       // Записываем данные в Firestore и обрабатываем успешное выполнение
       Promise.all([
         setDoc(doc(db, "calendarEvents", date), { events: eventsForDate }),
-        setDoc(doc(db, "calendarEvents", nextDate), { events: eventsForDate }),
+        setDoc(doc(db, "calendarEvents", nextDate), { 
+          events: eventsForDate.map(event => {
+              return { ...event, isCloned: true };
+          }) 
+      }),
+      
         setDoc(doc(db, "tableData", eventId), {
           startDate: date,
           endDate: nextDate,
@@ -402,54 +413,6 @@ const App = () => {
     setInputValue(e.target.value);
   };
 
-  // Обновленная функция cellRender: Отображает данные в ячейке календаря (подсвечивает события для выбранной даты).
-  // const cellRender = (value) => {
-  //   const date = value.format("YYYY-MM-DD");
-  //   const events = calendarData[date];
-  //   return (
-  //     <div>
-  //       {events && events.length > 0 ? (
-  //         <ul className="events">
-  //           {events.map((event, index) => (
-  //             <li key={index}>
-  //               <Badge
-  //                 status="success"
-  //                 color={getColorByIndex(index)}
-  //                 text={event.content}
-  //               />
-  //             </li>
-  //           ))}
-  //         </ul>
-  //       ) : null}
-  //     </div>
-  //   );
-  // };
-
-
-
-  // const cellRender = (value) => {
-  //   const date = value.format("YYYY-MM-DD");
-  //   const events = calendarData[date];
-  //   return (
-  //     <div>
-  //       {events && events.length > 0 ? (
-  //         <ul className="events">
-  //           {events.map((event, index) => (
-  //             <li key={index}>
-  //               <MinusCircleOutlined
-  //                 style={{ color: "#ff4d4f", marginRight: 8 }}
-  //               />
-  //               <span>
-  //                 {event.content}
-  //               </span>
-  //             </li>
-  //           ))}
-  //         </ul>
-  //       ) : null}
-  //     </div>
-  //   );
-  // };
-
   const cellRender = (value) => {
     const date = value.format("YYYY-MM-DD");
     const events = calendarData[date];
@@ -474,8 +437,6 @@ const App = () => {
   };
   
   
- 
-  
   useEffect(() => {
     // Получаем текущую дату
     const currentDate = moment();
@@ -489,10 +450,18 @@ const App = () => {
         const calendarDataRef = collection(db, "calendarEvents");
         const calendarDataSnapshot = await getDocs(calendarDataRef);
         const newCalendarData = {};
-        calendarDataSnapshot.forEach((doc) => {
-          newCalendarData[doc.id] = doc.data().events;
-        });
-        setCalendarData(newCalendarData);
+
+calendarDataSnapshot.forEach((doc) => {
+    // Для каждого события в doc.data().events проверьте наличие флага isCloned
+    // и установите его в соответствующем состоянии.
+    newCalendarData[doc.id] = doc.data().events.map(event => {
+        return {
+            ...event,
+            isCloned: event.isCloned || false // Установите значение по умолчанию в false, если флаг isCloned отсутствует
+        };
+    });
+});
+setCalendarData(newCalendarData);
 
         // Загрузка данных таблицы из Firestore
         const tableDataRef = collection(db, "tableData");
@@ -575,6 +544,8 @@ const App = () => {
       console.error("Ошибка при записи уведомления в Firestore:", error);
     }
   };
+
+  
 
   const showNotification = (content, date) => {
     const currentDate = moment();
