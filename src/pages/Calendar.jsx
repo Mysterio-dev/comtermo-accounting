@@ -90,7 +90,7 @@ const App = () => {
       ),
     },
     {
-      title: "Текст",
+      title: "Сумма",
       dataIndex: "tableContent",
     },
     {
