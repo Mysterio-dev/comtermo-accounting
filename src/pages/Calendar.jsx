@@ -248,7 +248,6 @@ const App = () => {
     events.filter((event) => event.eventId !== eventId);
 
   // Функция для загрузки данных календаря и таблицы из Firestore
-<<<<<<< HEAD
   // const loadCalendarAndTableData = async () => {
   //   try {
   //     // Загрузка данных календаря из Firestore
@@ -263,24 +262,6 @@ const App = () => {
   //           };
   //       });
   //   });
-=======
-  const loadCalendarAndTableData = async () => {
-    try {
-      // Загрузка данных календаря из Firestore
-      const calendarDataRef = collection(db, "calendarEvents");
-      const calendarDataSnapshot = await getDocs(calendarDataRef);
-      const newCalendarData = {};
-      calendarDataSnapshot.forEach((doc) => {
-        newCalendarData[doc.id] = doc.data().events.map(event => {
-            return {
-                ...event,
-                isCloned: event.isCloned || false
-            };
-        });
-    });
-
-      setCalendarData(newCalendarData);
->>>>>>> f774a913da39b51d88cff7507ed03ca15458acc1
 
   //     setCalendarData(newCalendarData);
 
