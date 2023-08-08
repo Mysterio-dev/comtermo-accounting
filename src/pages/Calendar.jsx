@@ -48,6 +48,31 @@ const firebaseConfig = {
   measurementId: "G-PQ6DC10E55",
 };
 
+import sgMail from '@sendgrid/mail';
+
+// Установка API ключа SendGrid
+sgMail.setApiKey('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');
+
+
+
+
+const sendEmail = async (to, subject, text) => {
+  const msg = {
+    to,
+    from: 'golovatyk@com-termo.ru', // Адрес отправителя
+    subject,
+    text,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+};
+
+
 // Инициализация Firebase приложения
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -362,26 +387,27 @@ const App = () => {
           message.error("Ошибка при записи данных в Firestore");
         });
   
-        setCalendarData((prevData) => ({
-          ...prevData,
-          [date]: [...(prevData[date] || []), { eventId, content: inputValue }],
-          [nextDate]: [
-            ...(prevData[nextDate] || []),
-            { eventId, content: inputValue, isCloned: true }, // Установите isCloned в true при клонировании
-          ],
-        }));
+      //   setCalendarData((prevData) => ({
+      //     ...prevData,
+      //     [date]: [...(prevData[date] || []), { eventId, content: inputValue }],
+      //     [nextDate]: [
+      //       ...(prevData[nextDate] || []),
+      //       { eventId, content: inputValue, isCloned: true }, // Установите isCloned в true при клонировании
+      //     ],
+      //   }));
         
   
-      setTableData((prevData) => [
-        ...prevData,
-        {
-          tableStart: date,
-          tableEnd: nextDate,
-          tableContent: inputValue,
-          eventId, // Используем один и тот же идентификатор для события в таблице
+      // setTableData((prevData) => [
+      //   ...prevData,
+      //   {
+      //     tableStart: date,
+      //     tableEnd: nextDate,
+      //     tableContent: inputValue,
+      //     eventId, // Используем один и тот же идентификатор для события в таблице
          
-        },
-      ]);
+      //   },
+      // ]);
+
       message.success("Данные успешно добавлены!");
     }
     setInputValue("");
@@ -489,6 +515,8 @@ const App = () => {
 //     });
 //   }, []);
 
+
+
 useEffect(() => {
   const currentDate = moment();
   setCurrentMonth(currentDate.month());
@@ -510,6 +538,8 @@ useEffect(() => {
 
   // Установка слушателя для данных таблицы
   const tableDataRef = collection(db, "tableData");
+  const notificationsShownThisUpdate = new Set(shownNotifications);
+  
   const tableUnsubscribe = onSnapshot(tableDataRef, (snapshot) => {
     const newTableData = [];
     snapshot.forEach((doc) => {
@@ -530,13 +560,14 @@ useEffect(() => {
       if (
         endDate.diff(currentDate, "days") >= 0 &&
         endDate.diff(currentDate, "days") <= 7 &&
-        !shownNotifications.includes(event.eventId)
+        !notificationsShownThisUpdate.has(event.eventId)
       ) {
         showNotification(event.tableContent, event.tableEnd, true);
         setShownNotifications((prevNotifications) => [
           ...prevNotifications,
           event.eventId,
         ]);
+        notificationsShownThisUpdate.add(event.eventId);
       }
     });
   });
@@ -546,7 +577,8 @@ useEffect(() => {
     calendarUnsubscribe();
     tableUnsubscribe();
   };
-}, []);
+}, [shownNotifications]);
+
 
 
   // Второй useEffect остается как есть
@@ -591,7 +623,6 @@ useEffect(() => {
   };
 
   
-
   const showNotification = (content, date) => {
     const currentDate = moment();
     const targetDate = moment(date);
@@ -608,6 +639,9 @@ useEffect(() => {
       duration: 0,
       placement: "topLeft",
     });
+
+      // Отправка уведомления на почту
+  sendEmail('recipient@example.com', 'Предстоящее событие', notificationMessage);
   };
 
   // Вспомогательная функция для склонения слова "день"
