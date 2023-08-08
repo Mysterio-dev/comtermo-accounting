@@ -355,7 +355,6 @@ const App = () => {
       ])
         .then(() => {
           console.log("Данные успешно записаны в Firestore");
-          // Записываем уведомление о начале события
           addNotificationToFirestore(eventId, inputValue, date, true);
         })
         .catch((error) => {
@@ -423,7 +422,6 @@ const App = () => {
     );
   };
   
-<<<<<<< HEAD
 //   useEffect(() => {
 //     // Получаем текущую дату
 //     const currentDate = moment();
@@ -437,34 +435,6 @@ const App = () => {
 //         const calendarDataRef = collection(db, "calendarEvents");
 //         const calendarDataSnapshot = await getDocs(calendarDataRef);
 //         const newCalendarData = {};
-=======
-  
-  useEffect(() => {
-    // Получаем текущую дату
-    const currentDate = moment();
-    // Устанавливаем месяц текущей даты в состояние currentMonth
-    setCurrentMonth(currentDate.month());
-
-    // Функция для загрузки данных календаря и таблицы из Firestore
-    const loadCalendarAndTableData = async () => {
-      try {
-        // Загрузка данных календаря из Firestore
-        const calendarDataRef = collection(db, "calendarEvents");
-        const calendarDataSnapshot = await getDocs(calendarDataRef);
-        const newCalendarData = {};
-
-calendarDataSnapshot.forEach((doc) => {
-    // Для каждого события в doc.data().events проверьте наличие флага isCloned
-    // и установите его в соответствующем состоянии.
-    newCalendarData[doc.id] = doc.data().events.map(event => {
-        return {
-            ...event,
-            isCloned: event.isCloned || false // Установите значение по умолчанию в false, если флаг isCloned отсутствует
-        };
-    });
-});
-setCalendarData(newCalendarData);
->>>>>>> f774a913da39b51d88cff7507ed03ca15458acc1
 
 // calendarDataSnapshot.forEach((doc) => {
 //     // Для каждого события в doc.data().events проверьте наличие флага isCloned
