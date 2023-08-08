@@ -48,29 +48,9 @@ const firebaseConfig = {
   measurementId: "G-PQ6DC10E55",
 };
 
-import sgMail from '@sendgrid/mail';
-
-// Установка API ключа SendGrid
-sgMail.setApiKey('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');
 
 
 
-
-const sendEmail = async (to, subject, text) => {
-  const msg = {
-    to,
-    from: 'golovatyk@com-termo.ru', // Адрес отправителя
-    subject,
-    text,
-  };
-
-  try {
-    await sgMail.send(msg);
-    console.log('Email sent successfully');
-  } catch (error) {
-    console.error('Error sending email:', error);
-  }
-};
 
 
 // Инициализация Firebase приложения
@@ -640,8 +620,7 @@ useEffect(() => {
       placement: "topLeft",
     });
 
-      // Отправка уведомления на почту
-  sendEmail('recipient@example.com', 'Предстоящее событие', notificationMessage);
+
   };
 
   // Вспомогательная функция для склонения слова "день"
