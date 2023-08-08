@@ -248,6 +248,7 @@ const App = () => {
     events.filter((event) => event.eventId !== eventId);
 
   // Функция для загрузки данных календаря и таблицы из Firestore
+<<<<<<< HEAD
   // const loadCalendarAndTableData = async () => {
   //   try {
   //     // Загрузка данных календаря из Firestore
@@ -262,6 +263,24 @@ const App = () => {
   //           };
   //       });
   //   });
+=======
+  const loadCalendarAndTableData = async () => {
+    try {
+      // Загрузка данных календаря из Firestore
+      const calendarDataRef = collection(db, "calendarEvents");
+      const calendarDataSnapshot = await getDocs(calendarDataRef);
+      const newCalendarData = {};
+      calendarDataSnapshot.forEach((doc) => {
+        newCalendarData[doc.id] = doc.data().events.map(event => {
+            return {
+                ...event,
+                isCloned: event.isCloned || false
+            };
+        });
+    });
+
+      setCalendarData(newCalendarData);
+>>>>>>> f774a913da39b51d88cff7507ed03ca15458acc1
 
   //     setCalendarData(newCalendarData);
 
@@ -423,6 +442,7 @@ const App = () => {
     );
   };
   
+<<<<<<< HEAD
 //   useEffect(() => {
 //     // Получаем текущую дату
 //     const currentDate = moment();
@@ -436,6 +456,34 @@ const App = () => {
 //         const calendarDataRef = collection(db, "calendarEvents");
 //         const calendarDataSnapshot = await getDocs(calendarDataRef);
 //         const newCalendarData = {};
+=======
+  
+  useEffect(() => {
+    // Получаем текущую дату
+    const currentDate = moment();
+    // Устанавливаем месяц текущей даты в состояние currentMonth
+    setCurrentMonth(currentDate.month());
+
+    // Функция для загрузки данных календаря и таблицы из Firestore
+    const loadCalendarAndTableData = async () => {
+      try {
+        // Загрузка данных календаря из Firestore
+        const calendarDataRef = collection(db, "calendarEvents");
+        const calendarDataSnapshot = await getDocs(calendarDataRef);
+        const newCalendarData = {};
+
+calendarDataSnapshot.forEach((doc) => {
+    // Для каждого события в doc.data().events проверьте наличие флага isCloned
+    // и установите его в соответствующем состоянии.
+    newCalendarData[doc.id] = doc.data().events.map(event => {
+        return {
+            ...event,
+            isCloned: event.isCloned || false // Установите значение по умолчанию в false, если флаг isCloned отсутствует
+        };
+    });
+});
+setCalendarData(newCalendarData);
+>>>>>>> f774a913da39b51d88cff7507ed03ca15458acc1
 
 // calendarDataSnapshot.forEach((doc) => {
 //     // Для каждого события в doc.data().events проверьте наличие флага isCloned
@@ -590,6 +638,8 @@ useEffect(() => {
       console.error("Ошибка при записи уведомления в Firestore:", error);
     }
   };
+
+  
 
   const showNotification = (content, date) => {
     const currentDate = moment();
