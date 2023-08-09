@@ -38,6 +38,7 @@ import {
   onSnapshot 
 } from "firebase/firestore";
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyAMENFkqkVFAMWpxLSFWsGB2AWsGiPbG5s",
   authDomain: "comtermo-calendar.firebaseapp.com",
@@ -48,16 +49,13 @@ const firebaseConfig = {
   measurementId: "G-PQ6DC10E55",
 };
 
-
-
-
-
-
 // Инициализация Firebase приложения
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+
 const App = () => {
+  
 
   // Получаем текущий год
   const currentYear = new Date().getFullYear();
@@ -95,7 +93,7 @@ const App = () => {
       ),
     },
     {
-      title: "Сумма",
+      title: "Сумма или комментарий",
       dataIndex: "tableContent",
     },
     {
@@ -184,7 +182,6 @@ const App = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [shownNotifications, setShownNotifications] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleDelete = async (eventId) => {
     try {
@@ -333,7 +330,6 @@ const App = () => {
     }
   };
 
-  
   const handleModalOk = () => {
     if (inputValue.trim() !== "") {
       const eventId = Date.now().toString();
@@ -496,7 +492,6 @@ const App = () => {
 //   }, []);
 
 
-
 useEffect(() => {
   const currentDate = moment();
   setCurrentMonth(currentDate.month());
@@ -560,7 +555,6 @@ useEffect(() => {
 }, [shownNotifications]);
 
 
-
   // Второй useEffect остается как есть
   useEffect(() => {
     const currentDate = moment();
@@ -602,7 +596,7 @@ useEffect(() => {
     }
   };
 
-  
+
   const showNotification = (content, date) => {
     const currentDate = moment();
     const targetDate = moment(date);

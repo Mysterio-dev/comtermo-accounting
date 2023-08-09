@@ -8,6 +8,9 @@ import './App.scss';
 import 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 
+
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyAMENFkqkVFAMWpxLSFWsGB2AWsGiPbG5s",
   authDomain: "comtermo-calendar.firebaseapp.com",
