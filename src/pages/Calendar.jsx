@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import {
   Calendar,
   Modal,
@@ -35,7 +36,7 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-  onSnapshot 
+  onSnapshot
 } from "firebase/firestore";
 
 
@@ -55,7 +56,7 @@ const db = getFirestore(app);
 
 
 const App = () => {
-  
+
 
   // Получаем текущий год
   const currentYear = new Date().getFullYear();
@@ -113,7 +114,7 @@ const App = () => {
       ),
     },
   ];
-  
+
   // Определение массива фиксированных цветов
   const colors = [
     "#3399FF",
@@ -137,17 +138,23 @@ const App = () => {
 
   // Обработчик изменения панели календаря (onPanelChange): Если выбранная дата находится в другом месяце, сбрасывает выбранную дату и скрывает модальное окно.
   const onPanelChange = (value, mode) => {
-    if (selectedDate) {
-      const currentDate = selectedDate.format("YYYY-MM");
-      const panelDate = value.format("YYYY-MM");
-
-      if (currentDate !== panelDate) {
-        setSelectedDate(null);
-        setIsModalVisible(false);
+    if (mode === 'year') {
+      setSelectedDate(null); // Сбрасываем выбранную дату
+      setIsModalVisible(false); // Закрываем модальное окно
+    } else {
+      if (selectedDate) {
+        const currentDate = selectedDate.format('YYYY-MM');
+        const panelDate = value.format('YYYY-MM');
+  
+        if (currentDate !== panelDate) {
+          setSelectedDate(null); // Сбрасываем выбранную дату
+          setIsModalVisible(false); // Закрываем модальное окно
+        }
       }
+      setCurrentMonth(value.month());
     }
-    setCurrentMonth(value.month());
   };
+  
 
   const onSelect = (value) => {
     if (value && value.isValid()) {
@@ -290,7 +297,7 @@ const App = () => {
     try {
       const calendarDataRef = collection(db, "calendarEvents");
       const tableDataRef = collection(db, "tableData");
-  
+
       // Установка слушателя для событий календаря
       const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
         const newCalendarData = {};
@@ -304,7 +311,7 @@ const App = () => {
         });
         setCalendarData(newCalendarData);
       });
-  
+
       // Установка слушателя для данных таблицы
       const tableUnsubscribe = onSnapshot(tableDataRef, (snapshot) => {
         const newTableData = [];
@@ -319,7 +326,7 @@ const App = () => {
         });
         setTableData(newTableData);
       });
-  
+
       // Возвращение функций очистки, чтобы отписаться при размонтировании компонента
       return () => {
         calendarUnsubscribe();
@@ -338,16 +345,16 @@ const App = () => {
         ? [...calendarData[date], { eventId, content: inputValue }]
         : [{ eventId, content: inputValue }];
       const nextDate = selectedDate.clone().add(30, "days").format("YYYY-MM-DD");
-  
+
       // Записываем данные в Firestore и обрабатываем успешное выполнение
       Promise.all([
         setDoc(doc(db, "calendarEvents", date), { events: eventsForDate }),
-        setDoc(doc(db, "calendarEvents", nextDate), { 
+        setDoc(doc(db, "calendarEvents", nextDate), {
           events: eventsForDate.map(event => {
-              return { ...event, isCloned: true };
-          }) 
-      }),
-      
+            return { ...event, isCloned: true };
+          })
+        }),
+
         setDoc(doc(db, "tableData", eventId), {
           startDate: date,
           endDate: nextDate,
@@ -362,7 +369,7 @@ const App = () => {
           console.error("Ошибка при записи данных в Firestore:", error);
           message.error("Ошибка при записи данных в Firestore");
         });
-  
+
       //   setCalendarData((prevData) => ({
       //     ...prevData,
       //     [date]: [...(prevData[date] || []), { eventId, content: inputValue }],
@@ -371,8 +378,8 @@ const App = () => {
       //       { eventId, content: inputValue, isCloned: true }, // Установите isCloned в true при клонировании
       //     ],
       //   }));
-        
-  
+
+
       // setTableData((prevData) => [
       //   ...prevData,
       //   {
@@ -380,7 +387,7 @@ const App = () => {
       //     tableEnd: nextDate,
       //     tableContent: inputValue,
       //     eventId, // Используем один и тот же идентификатор для события в таблице
-         
+
       //   },
       // ]);
 
@@ -389,7 +396,7 @@ const App = () => {
     setInputValue("");
     setIsModalVisible(false);
   };
-  
+
   // Обработчик закрытия модального окна (handleModalCancel): Очищает поле ввода и скрывает модальное окно.
   const handleModalCancel = () => {
     setInputValue("");
@@ -423,136 +430,136 @@ const App = () => {
       </div>
     );
   };
-  
-//   useEffect(() => {
-//     // Получаем текущую дату
-//     const currentDate = moment();
-//     // Устанавливаем месяц текущей даты в состояние currentMonth
-//     setCurrentMonth(currentDate.month());
 
-//     // Функция для загрузки данных календаря и таблицы из Firestore
-//     const loadCalendarAndTableData = async () => {
-//       try {
-//         // Загрузка данных календаря из Firestore
-//         const calendarDataRef = collection(db, "calendarEvents");
-//         const calendarDataSnapshot = await getDocs(calendarDataRef);
-//         const newCalendarData = {};
+  //   useEffect(() => {
+  //     // Получаем текущую дату
+  //     const currentDate = moment();
+  //     // Устанавливаем месяц текущей даты в состояние currentMonth
+  //     setCurrentMonth(currentDate.month());
 
-// calendarDataSnapshot.forEach((doc) => {
-//     // Для каждого события в doc.data().events проверьте наличие флага isCloned
-//     // и установите его в соответствующем состоянии.
-//     newCalendarData[doc.id] = doc.data().events.map(event => {
-//         return {
-//             ...event,
-//             isCloned: event.isCloned || false // Установите значение по умолчанию в false, если флаг isCloned отсутствует
-//         };
-//     });
-// });
-// setCalendarData(newCalendarData);
+  //     // Функция для загрузки данных календаря и таблицы из Firestore
+  //     const loadCalendarAndTableData = async () => {
+  //       try {
+  //         // Загрузка данных календаря из Firestore
+  //         const calendarDataRef = collection(db, "calendarEvents");
+  //         const calendarDataSnapshot = await getDocs(calendarDataRef);
+  //         const newCalendarData = {};
 
-//         // Загрузка данных таблицы из Firestore
-//         const tableDataRef = collection(db, "tableData");
-//         const tableDataSnapshot = await getDocs(tableDataRef);
-//         const newTableData = [];
-//         tableDataSnapshot.forEach((doc) => {
-//           const { startDate, endDate, content } = doc.data();
-//           newTableData.push({
-//             tableStart: startDate,
-//             tableEnd: endDate,
-//             tableContent: content,
-//             eventId: doc.id,
-//           });
-//         });
-//         setTableData(newTableData);
-//       } catch (error) {
-//         console.error("Ошибка при загрузке данных из Firestore:", error);
-//       }
-//     };
+  // calendarDataSnapshot.forEach((doc) => {
+  //     // Для каждого события в doc.data().events проверьте наличие флага isCloned
+  //     // и установите его в соответствующем состоянии.
+  //     newCalendarData[doc.id] = doc.data().events.map(event => {
+  //         return {
+  //             ...event,
+  //             isCloned: event.isCloned || false // Установите значение по умолчанию в false, если флаг isCloned отсутствует
+  //         };
+  //     });
+  // });
+  // setCalendarData(newCalendarData);
 
-//     loadCalendarAndTableData(); // Загружаем данные при монтировании компонента
+  //         // Загрузка данных таблицы из Firestore
+  //         const tableDataRef = collection(db, "tableData");
+  //         const tableDataSnapshot = await getDocs(tableDataRef);
+  //         const newTableData = [];
+  //         tableDataSnapshot.forEach((doc) => {
+  //           const { startDate, endDate, content } = doc.data();
+  //           newTableData.push({
+  //             tableStart: startDate,
+  //             tableEnd: endDate,
+  //             tableContent: content,
+  //             eventId: doc.id,
+  //           });
+  //         });
+  //         setTableData(newTableData);
+  //       } catch (error) {
+  //         console.error("Ошибка при загрузке данных из Firestore:", error);
+  //       }
+  //     };
 
-//     // Обработка уведомлений в зависимости от tableData
-//     tableData.forEach((event) => {
-//       const endDate = moment(event.tableEnd);
-//       const currentDate = moment();
+  //     loadCalendarAndTableData(); // Загружаем данные при монтировании компонента
 
-//       // Уведомление в течение 7 дней до окончания события и только если не показано ранее
-//       if (
-//         endDate.diff(currentDate, "days") >= 0 &&
-//         endDate.diff(currentDate, "days") <= 7 &&
-//         !shownNotifications.includes(event.eventId)
-//       ) {
-//         showNotification(event.tableContent, event.tableEnd, true);
-//         setShownNotifications((prevNotifications) => [
-//           ...prevNotifications,
-//           event.eventId,
-//         ]);
-//       }
-//     });
-//   }, []);
+  //     // Обработка уведомлений в зависимости от tableData
+  //     tableData.forEach((event) => {
+  //       const endDate = moment(event.tableEnd);
+  //       const currentDate = moment();
+
+  //       // Уведомление в течение 7 дней до окончания события и только если не показано ранее
+  //       if (
+  //         endDate.diff(currentDate, "days") >= 0 &&
+  //         endDate.diff(currentDate, "days") <= 7 &&
+  //         !shownNotifications.includes(event.eventId)
+  //       ) {
+  //         showNotification(event.tableContent, event.tableEnd, true);
+  //         setShownNotifications((prevNotifications) => [
+  //           ...prevNotifications,
+  //           event.eventId,
+  //         ]);
+  //       }
+  //     });
+  //   }, []);
 
 
-useEffect(() => {
-  const currentDate = moment();
-  setCurrentMonth(currentDate.month());
+  useEffect(() => {
+    const currentDate = moment();
+    setCurrentMonth(currentDate.month());
 
-  // Установка слушателя для данных календаря
-  const calendarDataRef = collection(db, "calendarEvents");
-  const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
-    const newCalendarData = {};
-    snapshot.forEach((doc) => {
-      newCalendarData[doc.id] = doc.data().events.map((event) => {
-        return {
-          ...event,
-          isCloned: event.isCloned || false,
-        };
+    // Установка слушателя для данных календаря
+    const calendarDataRef = collection(db, "calendarEvents");
+    const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
+      const newCalendarData = {};
+      snapshot.forEach((doc) => {
+        newCalendarData[doc.id] = doc.data().events.map((event) => {
+          return {
+            ...event,
+            isCloned: event.isCloned || false,
+          };
+        });
+      });
+      setCalendarData(newCalendarData);
+    });
+
+    // Установка слушателя для данных таблицы
+    const tableDataRef = collection(db, "tableData");
+    const notificationsShownThisUpdate = new Set(shownNotifications);
+
+    const tableUnsubscribe = onSnapshot(tableDataRef, (snapshot) => {
+      const newTableData = [];
+      snapshot.forEach((doc) => {
+        const { startDate, endDate, content } = doc.data();
+        newTableData.push({
+          tableStart: startDate,
+          tableEnd: endDate,
+          tableContent: content,
+          eventId: doc.id,
+        });
+      });
+      setTableData(newTableData);
+
+      // Обработка уведомлений в зависимости от новых данных таблицы
+      newTableData.forEach((event) => {
+        const endDate = moment(event.tableEnd);
+        const currentDate = moment();
+        if (
+          endDate.diff(currentDate, "days") >= 0 &&
+          endDate.diff(currentDate, "days") <= 7 &&
+          !notificationsShownThisUpdate.has(event.eventId)
+        ) {
+          showNotification(event.tableContent, event.tableEnd, true);
+          setShownNotifications((prevNotifications) => [
+            ...prevNotifications,
+            event.eventId,
+          ]);
+          notificationsShownThisUpdate.add(event.eventId);
+        }
       });
     });
-    setCalendarData(newCalendarData);
-  });
 
-  // Установка слушателя для данных таблицы
-  const tableDataRef = collection(db, "tableData");
-  const notificationsShownThisUpdate = new Set(shownNotifications);
-  
-  const tableUnsubscribe = onSnapshot(tableDataRef, (snapshot) => {
-    const newTableData = [];
-    snapshot.forEach((doc) => {
-      const { startDate, endDate, content } = doc.data();
-      newTableData.push({
-        tableStart: startDate,
-        tableEnd: endDate,
-        tableContent: content,
-        eventId: doc.id,
-      });
-    });
-    setTableData(newTableData);
-
-    // Обработка уведомлений в зависимости от новых данных таблицы
-    newTableData.forEach((event) => {
-      const endDate = moment(event.tableEnd);
-      const currentDate = moment();
-      if (
-        endDate.diff(currentDate, "days") >= 0 &&
-        endDate.diff(currentDate, "days") <= 7 &&
-        !notificationsShownThisUpdate.has(event.eventId)
-      ) {
-        showNotification(event.tableContent, event.tableEnd, true);
-        setShownNotifications((prevNotifications) => [
-          ...prevNotifications,
-          event.eventId,
-        ]);
-        notificationsShownThisUpdate.add(event.eventId);
-      }
-    });
-  });
-
-  // Возвращение функций очистки, чтобы отписаться при размонтировании компонента
-  return () => {
-    calendarUnsubscribe();
-    tableUnsubscribe();
-  };
-}, [shownNotifications]);
+    // Возвращение функций очистки, чтобы отписаться при размонтировании компонента
+    return () => {
+      calendarUnsubscribe();
+      tableUnsubscribe();
+    };
+  }, [shownNotifications]);
 
 
   // Второй useEffect остается как есть
@@ -652,13 +659,13 @@ useEffect(() => {
                   onPanelChange={onPanelChange}
                   onSelect={onSelect}
                   cellRender={cellRender}
-                 
+
                 />
                 <Modal
                   title={`Запись на ${selectedDate ? selectedDate.format("DD/MM/YYYY") : ""
                     }`}
                   centered
-                  visible={isModalVisible}
+                  open={isModalVisible}
                   onOk={handleModalOk}
                   onCancel={handleModalCancel}
                 >
@@ -671,16 +678,16 @@ useEffect(() => {
               </div>
             </Col>
             <Col span={9}>
-  <div className="table-wrapper">
-    <Table
-      columns={columns}
-      dataSource={tableData.map((item, index) => ({
-        ...item,
-        key: item.tableStart + index,
-      }))}
-    />
-  </div>
-</Col>
+              <div className="table-wrapper">
+                <Table
+                  columns={columns}
+                  dataSource={tableData.map((item, index) => ({
+                    ...item,
+                    key: item.tableStart + index,
+                  }))}
+                />
+              </div>
+            </Col>
           </Row>
         </Content>
         <Footer className="footer">
@@ -690,5 +697,7 @@ useEffect(() => {
     </ConfigProvider>
   );
 };
+
+
 
 export default App;
