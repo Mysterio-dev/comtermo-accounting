@@ -618,7 +618,7 @@ const App = () => {
       message: "Предстоящее событие",
       description: notificationMessage,
       duration: 0,
-      placement: "topLeft",
+      placement: "bottomLeft",
     });
 
 
