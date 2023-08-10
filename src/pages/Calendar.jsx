@@ -78,7 +78,7 @@ const App = () => {
       render: (text) => (
         <div className="tableValue">
           <MinusCircleOutlined style={{ marginRight: 8, color: "#02aaff" }} />
-          {text}
+          {moment(text).format("DD.MM.YYYY")}
         </div>
       ),
     },
@@ -89,7 +89,7 @@ const App = () => {
       render: (text) => (
         <div className="tableValue">
           <PlusCircleOutlined style={{ marginRight: 8, color: 'rgb(255 95 97)' }} />
-          {text}
+          {moment(text).format("DD.MM.YYYY")}
         </div>
       ),
     },
@@ -662,7 +662,7 @@ const App = () => {
 
                 />
                 <Modal
-                  title={`Запись на ${selectedDate ? selectedDate.format("DD/MM/YYYY") : ""
+                  title={`Запись на ${selectedDate ? selectedDate.format("DD.MM.YYYY") : ""
                     }`}
                   centered
                   open={isModalVisible}
