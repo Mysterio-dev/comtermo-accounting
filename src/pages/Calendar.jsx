@@ -4,21 +4,23 @@ import {
   Calendar,
   Modal,
   Input,
-  Badge,
   message,
   notification,
   Table,
   Button,
   ConfigProvider,
   Popconfirm,
-  Tag,
   Layout,
   Typography,
 } from "antd";
-import { getAuth, signOut } from "firebase/auth";
 const { Header, Footer, Content } = Layout; // Деструктурируйте компоненты Layout
 const { Text } = Typography;
-import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import {
+  MinusCircleOutlined,
+  PlusCircleOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import { Col, Row } from "antd";
 import moment from "moment";
 import "moment/locale/ru";
@@ -36,9 +38,8 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-  onSnapshot
+  onSnapshot,
 } from "firebase/firestore";
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyAMENFkqkVFAMWpxLSFWsGB2AWsGiPbG5s",
@@ -54,10 +55,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-
 const App = () => {
-
-
   // Получаем текущий год
   const currentYear = new Date().getFullYear();
 
@@ -88,7 +86,9 @@ const App = () => {
       sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
       render: (text) => (
         <div className="tableValue">
-          <PlusCircleOutlined style={{ marginRight: 8, color: 'rgb(255 95 97)' }} />
+          <PlusCircleOutlined
+            style={{ marginRight: 8, color: "rgb(255 95 97)" }}
+          />
           {moment(text).format("DD.MM.YYYY")}
         </div>
       ),
@@ -101,16 +101,32 @@ const App = () => {
       title: "Действие",
       dataIndex: "tableControl",
       render: (_, record) => (
-        <Popconfirm
-          title="Вы действительно хотите удалить эту запись?"
-          onConfirm={() => handleDelete(record.eventId)}
-          okText="Да"
-          cancelText="Отмена"
-        >
-          <Button type="primary" size="small" danger>
-            Удалить
+        <div className="table-action">
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => handleEdit(record.eventId, record.tableContent)}
+            
+            
+          >
+            <EditOutlined />
           </Button>
-        </Popconfirm>
+          <Popconfirm
+            title="Вы действительно хотите удалить эту запись?"
+            onConfirm={() => handleDelete(record.eventId)}
+            okText="Да"
+            cancelText="Отмена"
+          >
+            <Button
+              type="primary"
+              size="small"
+              danger
+              style={{ marginRight: 8 }}
+            >
+              <DeleteOutlined />
+            </Button>
+          </Popconfirm>
+        </div>
       ),
     },
   ];
@@ -138,14 +154,14 @@ const App = () => {
 
   // Обработчик изменения панели календаря (onPanelChange): Если выбранная дата находится в другом месяце, сбрасывает выбранную дату и скрывает модальное окно.
   const onPanelChange = (value, mode) => {
-    if (mode === 'year') {
+    if (mode === "year") {
       setSelectedDate(null); // Сбрасываем выбранную дату
       setIsModalVisible(false); // Закрываем модальное окно
     } else {
       if (selectedDate) {
-        const currentDate = selectedDate.format('YYYY-MM');
-        const panelDate = value.format('YYYY-MM');
-  
+        const currentDate = selectedDate.format("YYYY-MM");
+        const panelDate = value.format("YYYY-MM");
+
         if (currentDate !== panelDate) {
           setSelectedDate(null); // Сбрасываем выбранную дату
           setIsModalVisible(false); // Закрываем модальное окно
@@ -154,7 +170,6 @@ const App = () => {
       setCurrentMonth(value.month());
     }
   };
-  
 
   const onSelect = (value) => {
     if (value && value.isValid()) {
@@ -189,6 +204,12 @@ const App = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [shownNotifications, setShownNotifications] = useState([]);
+
+
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [editingEventContent, setEditingEventContent] = useState("");
+  const [editModalVisible, setEditModalVisible] = useState(false);
+
 
   const handleDelete = async (eventId) => {
     try {
@@ -256,43 +277,6 @@ const App = () => {
   const getFieldValueWithoutEventId = (events, eventId) =>
     events.filter((event) => event.eventId !== eventId);
 
-  // Функция для загрузки данных календаря и таблицы из Firestore
-  // const loadCalendarAndTableData = async () => {
-  //   try {
-  //     // Загрузка данных календаря из Firestore
-  //     const calendarDataRef = collection(db, "calendarEvents");
-  //     const calendarDataSnapshot = await getDocs(calendarDataRef);
-  //     const newCalendarData = {};
-  //     calendarDataSnapshot.forEach((doc) => {
-  //       newCalendarData[doc.id] = doc.data().events.map(event => {
-  //           return {
-  //               ...event,
-  //               isCloned: event.isCloned || false
-  //           };
-  //       });
-  //   });
-
-  //     setCalendarData(newCalendarData);
-
-  //     // Загрузка данных таблицы из Firestore
-  //     const tableDataRef = collection(db, "tableData");
-  //     const tableDataSnapshot = await getDocs(tableDataRef);
-  //     const newTableData = [];
-  //     tableDataSnapshot.forEach((doc) => {
-  //       const { startDate, endDate, content } = doc.data();
-  //       newTableData.push({
-  //         tableStart: startDate,
-  //         tableEnd: endDate,
-  //         tableContent: content,
-  //         eventId: doc.id,
-  //       });
-  //     });
-  //     setTableData(newTableData);
-  //   } catch (error) {
-  //     console.error("Ошибка при загрузке данных из Firestore:", error);
-  //   }
-  // };
-
   const loadCalendarAndTableData = () => {
     try {
       const calendarDataRef = collection(db, "calendarEvents");
@@ -337,6 +321,17 @@ const App = () => {
     }
   };
 
+  const handleEdit = (eventId, content) => {
+    setEditingEventId(eventId);
+    setEditingEventContent(content);
+    setEditModalVisible(true);
+  };
+
+
+  const handleEditInputChange = (e) => {
+    setEditingEventContent(e.target.value);
+  };
+
   const handleModalOk = () => {
     if (inputValue.trim() !== "") {
       const eventId = Date.now().toString();
@@ -344,15 +339,18 @@ const App = () => {
       const eventsForDate = calendarData[date]
         ? [...calendarData[date], { eventId, content: inputValue }]
         : [{ eventId, content: inputValue }];
-      const nextDate = selectedDate.clone().add(30, "days").format("YYYY-MM-DD");
+      const nextDate = selectedDate
+        .clone()
+        .add(30, "days")
+        .format("YYYY-MM-DD");
 
       // Записываем данные в Firestore и обрабатываем успешное выполнение
       Promise.all([
         setDoc(doc(db, "calendarEvents", date), { events: eventsForDate }),
         setDoc(doc(db, "calendarEvents", nextDate), {
-          events: eventsForDate.map(event => {
+          events: eventsForDate.map((event) => {
             return { ...event, isCloned: true };
-          })
+          }),
         }),
 
         setDoc(doc(db, "tableData", eventId), {
@@ -370,43 +368,155 @@ const App = () => {
           message.error("Ошибка при записи данных в Firestore");
         });
 
-      //   setCalendarData((prevData) => ({
-      //     ...prevData,
-      //     [date]: [...(prevData[date] || []), { eventId, content: inputValue }],
-      //     [nextDate]: [
-      //       ...(prevData[nextDate] || []),
-      //       { eventId, content: inputValue, isCloned: true }, // Установите isCloned в true при клонировании
-      //     ],
-      //   }));
-
-
-      // setTableData((prevData) => [
-      //   ...prevData,
-      //   {
-      //     tableStart: date,
-      //     tableEnd: nextDate,
-      //     tableContent: inputValue,
-      //     eventId, // Используем один и тот же идентификатор для события в таблице
-
-      //   },
-      // ]);
-
       message.success("Данные успешно добавлены!");
     }
     setInputValue("");
     setIsModalVisible(false);
   };
 
+  
+
+//   const handleEditOk = () => {
+//     console.log("Editing Event ID:", editingEventId);
+// console.log("Editing content:", editingEventContent);
+// console.log("Selected date:", selectedDate);
+
+//     if (editingEventContent.trim() !== "" && selectedDate) {
+//       const date = selectedDate.format("YYYY-MM-DD");
+//       const updatedEvents = calendarData[date].map((event) =>
+//         event.eventId === editingEventId
+//           ? { ...event, content: editingEventContent }
+//           : event
+//       );
+
+//       const updatedCalendarData = { ...calendarData };
+//       updatedCalendarData[date] = updatedEvents;
+
+//       const nextDate = moment(date).add(30, 'days').format("YYYY-MM-DD");
+//       const eventsForNextDate = updatedEvents.map((event) => ({
+//         ...event,
+//         isCloned: true,
+//       }));
+//       updatedCalendarData[nextDate] = eventsForNextDate;
+
+//       // Обновление данных в Firestore и обрабатываем успешное выполнение
+//       Promise.all([
+//         setDoc(doc(db, "calendarEvents", date), { events: updatedEvents }),
+//         setDoc(doc(db, "calendarEvents", nextDate), { events: eventsForNextDate }),
+//         updateDoc(doc(db, "tableData", editingEventId), {
+//           content: editingEventContent,
+//         }), // Обновление данных в Firestore для таблицы
+//         // Другие обновления в Firestore (если нужно)
+//       ])
+//         .then(() => {
+//           console.log("Данные успешно обновлены в Firestore");
+//           // Дополнительные действия (если требуется)
+//         })
+//         .catch((error) => {
+//           console.error("Ошибка при обновлении данных в Firestore:", error);
+//           message.error("Ошибка при обновлении данных в Firestore");
+//         });
+
+//       // Обновление данных в tableData
+//       const updatedTableData = tableData.map((item) =>
+//         item.eventId === editingEventId
+//           ? { ...item, tableContent: editingEventContent }
+//           : item
+//       );
+//       setTableData(updatedTableData);
+
+//    // Завершение редактирования
+//    setEditingEventId(null);
+//    setEditingEventContent("");
+//    setEditModalVisible(false);
+//     }
+//   };
+
+
+const findDateByEventId = (data, eventId) => {
+  for (let date in data) {
+      const events = data[date];
+      if (events.some(event => event.eventId === eventId)) {
+          return date;
+      }
+  }
+  return null;
+};
+
+const handleEditOk = () => {
+  if (editingEventContent.trim() !== "") {
+      // Определяем дату редактируемого события
+      const date = findDateByEventId(calendarData, editingEventId);
+      
+      if (!date) {
+          console.error("Не удалось определить дату события.");
+          message.error("Ошибка при редактировании.");
+          return;
+      }
+
+      // Получаем список событий для этой даты и обновляем событие с заданным ID
+      const updatedEvents = calendarData[date].map((event) =>
+          event.eventId === editingEventId
+              ? { ...event, content: editingEventContent }
+              : event
+      );
+
+      // Получаем список событий для следующей даты (через 30 дней)
+      const nextDate = moment(date).add(30, 'days').format("YYYY-MM-DD");
+      const updatedEventsForNextDate = (calendarData[nextDate] || []).map((event) =>
+          event.eventId === editingEventId
+              ? { ...event, content: editingEventContent }
+              : event
+      );
+
+      // Обновление данных в Firestore и обрабатываем успешное выполнение
+      Promise.all([
+          setDoc(doc(db, "calendarEvents", date), { events: updatedEvents }),
+          setDoc(doc(db, "calendarEvents", nextDate), { events: updatedEventsForNextDate }),
+          updateDoc(doc(db, "tableData", editingEventId), {
+              content: editingEventContent,
+          }),
+      ])
+          .then(() => {
+              console.log("Данные успешно обновлены в Firestore");
+          })
+          .catch((error) => {
+              console.error("Ошибка при обновлении данных в Firestore:", error);
+              message.error("Ошибка при обновлении данных в Firestore");
+          });
+
+      // Обновление данных в tableData (если требуется)
+      const updatedTableData = tableData.map((item) =>
+          item.eventId === editingEventId
+              ? { ...item, tableContent: editingEventContent }
+              : item
+      );
+      setTableData(updatedTableData);
+
+      // Завершение редактирования
+      setEditingEventId(null);
+      setEditingEventContent("");
+      setEditModalVisible(false);
+  } else {
+      message.error("Содержимое не может быть пустым");
+  }
+};
+
+
+
   // Обработчик закрытия модального окна (handleModalCancel): Очищает поле ввода и скрывает модальное окно.
   const handleModalCancel = () => {
-    setInputValue("");
+    setEditingEventId(null);
+    setEditingEventContent("");
     setIsModalVisible(false);
+    setEditModalVisible(false);
   };
 
   // Обработчик изменения значения в поле ввода (handleInputChange).
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
+
 
   const cellRender = (value) => {
     const date = value.format("YYYY-MM-DD");
@@ -418,9 +528,13 @@ const App = () => {
             {events.map((event, index) => (
               <li key={index}>
                 {event.isCloned ? (
-                  <PlusCircleOutlined style={{ color: 'rgb(255 95 97)', marginRight: 8 }} /> // Иконка плюса для клонированного события
+                  <PlusCircleOutlined
+                    style={{ color: "rgb(255 95 97)", marginRight: 8 }}
+                  /> // Иконка плюса для клонированного события
                 ) : (
-                  <MinusCircleOutlined style={{ color: "#02aaff", marginRight: 8 }} />
+                  <MinusCircleOutlined
+                    style={{ color: "#02aaff", marginRight: 8 }}
+                  />
                 )}
                 <span>{event.content}</span>
               </li>
@@ -430,74 +544,6 @@ const App = () => {
       </div>
     );
   };
-
-  //   useEffect(() => {
-  //     // Получаем текущую дату
-  //     const currentDate = moment();
-  //     // Устанавливаем месяц текущей даты в состояние currentMonth
-  //     setCurrentMonth(currentDate.month());
-
-  //     // Функция для загрузки данных календаря и таблицы из Firestore
-  //     const loadCalendarAndTableData = async () => {
-  //       try {
-  //         // Загрузка данных календаря из Firestore
-  //         const calendarDataRef = collection(db, "calendarEvents");
-  //         const calendarDataSnapshot = await getDocs(calendarDataRef);
-  //         const newCalendarData = {};
-
-  // calendarDataSnapshot.forEach((doc) => {
-  //     // Для каждого события в doc.data().events проверьте наличие флага isCloned
-  //     // и установите его в соответствующем состоянии.
-  //     newCalendarData[doc.id] = doc.data().events.map(event => {
-  //         return {
-  //             ...event,
-  //             isCloned: event.isCloned || false // Установите значение по умолчанию в false, если флаг isCloned отсутствует
-  //         };
-  //     });
-  // });
-  // setCalendarData(newCalendarData);
-
-  //         // Загрузка данных таблицы из Firestore
-  //         const tableDataRef = collection(db, "tableData");
-  //         const tableDataSnapshot = await getDocs(tableDataRef);
-  //         const newTableData = [];
-  //         tableDataSnapshot.forEach((doc) => {
-  //           const { startDate, endDate, content } = doc.data();
-  //           newTableData.push({
-  //             tableStart: startDate,
-  //             tableEnd: endDate,
-  //             tableContent: content,
-  //             eventId: doc.id,
-  //           });
-  //         });
-  //         setTableData(newTableData);
-  //       } catch (error) {
-  //         console.error("Ошибка при загрузке данных из Firestore:", error);
-  //       }
-  //     };
-
-  //     loadCalendarAndTableData(); // Загружаем данные при монтировании компонента
-
-  //     // Обработка уведомлений в зависимости от tableData
-  //     tableData.forEach((event) => {
-  //       const endDate = moment(event.tableEnd);
-  //       const currentDate = moment();
-
-  //       // Уведомление в течение 7 дней до окончания события и только если не показано ранее
-  //       if (
-  //         endDate.diff(currentDate, "days") >= 0 &&
-  //         endDate.diff(currentDate, "days") <= 7 &&
-  //         !shownNotifications.includes(event.eventId)
-  //       ) {
-  //         showNotification(event.tableContent, event.tableEnd, true);
-  //         setShownNotifications((prevNotifications) => [
-  //           ...prevNotifications,
-  //           event.eventId,
-  //         ]);
-  //       }
-  //     });
-  //   }, []);
-
 
   useEffect(() => {
     const currentDate = moment();
@@ -561,7 +607,6 @@ const App = () => {
     };
   }, [shownNotifications]);
 
-
   // Второй useEffect остается как есть
   useEffect(() => {
     const currentDate = moment();
@@ -603,7 +648,6 @@ const App = () => {
     }
   };
 
-
   const showNotification = (content, date) => {
     const currentDate = moment();
     const targetDate = moment(date);
@@ -620,8 +664,6 @@ const App = () => {
       duration: 0,
       placement: "topLeft",
     });
-
-
   };
 
   // Вспомогательная функция для склонения слова "день"
@@ -659,13 +701,11 @@ const App = () => {
                   onPanelChange={onPanelChange}
                   onSelect={onSelect}
                   cellRender={cellRender}
-
                 />
                 <Modal
-                  title={`Запись на ${selectedDate ? selectedDate.format("DD.MM.YYYY") : ""
-                    }`}
+                  title={`Добавление записи на ${selectedDate ? selectedDate.format("DD.MM.YYYY") : ""}`}
                   centered
-                  open={isModalVisible}
+                  visible={isModalVisible}
                   onOk={handleModalOk}
                   onCancel={handleModalCancel}
                 >
@@ -673,6 +713,19 @@ const App = () => {
                     placeholder="Введите текст"
                     value={inputValue}
                     onChange={handleInputChange}
+                  />
+                </Modal>
+                <Modal
+                  title={"Редактирование записи"}
+                  centered
+                  open={editModalVisible}
+                  onOk={handleEditOk}
+                  onCancel={handleModalCancel}
+                >
+                  <Input
+                    placeholder="Введите текст"
+                    value={editingEventContent}
+                    onChange={handleEditInputChange}
                   />
                 </Modal>
               </div>
@@ -697,7 +750,5 @@ const App = () => {
     </ConfigProvider>
   );
 };
-
-
 
 export default App;
