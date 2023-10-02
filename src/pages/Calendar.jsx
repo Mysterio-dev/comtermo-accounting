@@ -13,6 +13,9 @@ import {
   Layout,
   Typography,
 } from "antd";
+
+
+import Circle from '@uiw/react-color-circle';
 const { Header, Footer, Content } = Layout; // Деструктурируйте компоненты Layout
 const { Text } = Typography;
 import {
@@ -75,7 +78,7 @@ const App = () => {
         moment(a.tableStart).unix() - moment(b.tableStart).unix(),
       render: (text) => (
         <div className="tableValue">
-          <MinusCircleOutlined style={{ marginRight: 8, color: "#02aaff" }} />
+          <MinusCircleOutlined style={{ marginRight: 5, color: "#0da51a"}} />
           {moment(text).format("DD.MM.YYYY")}
         </div>
       ),
@@ -87,7 +90,7 @@ const App = () => {
       render: (text) => (
         <div className="tableValue">
           <PlusCircleOutlined
-            style={{ marginRight: 8, color: "rgb(255 95 97)" }}
+            style={{ marginRight: 5, color: "rgb(255 95 97)" }}
           />
           {moment(text).format("DD.MM.YYYY")}
         </div>
@@ -106,8 +109,6 @@ const App = () => {
             type="primary"
             size="small"
             onClick={() => handleEdit(record.eventId, record.tableContent)}
-            
-            
           >
             <EditOutlined />
           </Button>
@@ -205,10 +206,11 @@ const App = () => {
   const [tableData, setTableData] = useState([]);
   const [shownNotifications, setShownNotifications] = useState([]);
 
-
   const [editingEventId, setEditingEventId] = useState(null);
   const [editingEventContent, setEditingEventContent] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
+
+  const [eventColor, setEventColor] = useState("rgba(0, 0, 0, 0.88)"); // можно установить любой цвет по умолчанию
 
 
   const handleDelete = async (eventId) => {
@@ -327,7 +329,6 @@ const App = () => {
     setEditModalVisible(true);
   };
 
-
   const handleEditInputChange = (e) => {
     setEditingEventContent(e.target.value);
   };
@@ -337,8 +338,8 @@ const App = () => {
       const eventId = Date.now().toString();
       const date = selectedDate.format("YYYY-MM-DD");
       const eventsForDate = calendarData[date]
-        ? [...calendarData[date], { eventId, content: inputValue }]
-        : [{ eventId, content: inputValue }];
+        ? [...calendarData[date], { eventId, content: inputValue,  color: eventColor }]
+        : [{ eventId, content: inputValue,  color: eventColor}];
       const nextDate = selectedDate
         .clone()
         .add(30, "days")
@@ -374,122 +375,66 @@ const App = () => {
     setIsModalVisible(false);
   };
 
-  
-
-//   const handleEditOk = () => {
-//     console.log("Editing Event ID:", editingEventId);
-// console.log("Editing content:", editingEventContent);
-// console.log("Selected date:", selectedDate);
-
-//     if (editingEventContent.trim() !== "" && selectedDate) {
-//       const date = selectedDate.format("YYYY-MM-DD");
-//       const updatedEvents = calendarData[date].map((event) =>
-//         event.eventId === editingEventId
-//           ? { ...event, content: editingEventContent }
-//           : event
-//       );
-
-//       const updatedCalendarData = { ...calendarData };
-//       updatedCalendarData[date] = updatedEvents;
-
-//       const nextDate = moment(date).add(30, 'days').format("YYYY-MM-DD");
-//       const eventsForNextDate = updatedEvents.map((event) => ({
-//         ...event,
-//         isCloned: true,
-//       }));
-//       updatedCalendarData[nextDate] = eventsForNextDate;
-
-//       // Обновление данных в Firestore и обрабатываем успешное выполнение
-//       Promise.all([
-//         setDoc(doc(db, "calendarEvents", date), { events: updatedEvents }),
-//         setDoc(doc(db, "calendarEvents", nextDate), { events: eventsForNextDate }),
-//         updateDoc(doc(db, "tableData", editingEventId), {
-//           content: editingEventContent,
-//         }), // Обновление данных в Firestore для таблицы
-//         // Другие обновления в Firestore (если нужно)
-//       ])
-//         .then(() => {
-//           console.log("Данные успешно обновлены в Firestore");
-//           // Дополнительные действия (если требуется)
-//         })
-//         .catch((error) => {
-//           console.error("Ошибка при обновлении данных в Firestore:", error);
-//           message.error("Ошибка при обновлении данных в Firestore");
-//         });
-
-//       // Обновление данных в tableData
-//       const updatedTableData = tableData.map((item) =>
-//         item.eventId === editingEventId
-//           ? { ...item, tableContent: editingEventContent }
-//           : item
-//       );
-//       setTableData(updatedTableData);
-
-//    // Завершение редактирования
-//    setEditingEventId(null);
-//    setEditingEventContent("");
-//    setEditModalVisible(false);
-//     }
-//   };
-
-
-const findDateByEventId = (data, eventId) => {
-  for (let date in data) {
+  const findDateByEventId = (data, eventId) => {
+    for (let date in data) {
       const events = data[date];
-      if (events.some(event => event.eventId === eventId)) {
-          return date;
+      if (events.some((event) => event.eventId === eventId)) {
+        return date;
       }
-  }
-  return null;
-};
+    }
+    return null;
+  };
 
-const handleEditOk = () => {
-  if (editingEventContent.trim() !== "") {
+  const handleEditOk = () => {
+    if (editingEventContent.trim() !== "") {
       // Определяем дату редактируемого события
       const date = findDateByEventId(calendarData, editingEventId);
-      
+
       if (!date) {
-          console.error("Не удалось определить дату события.");
-          message.error("Ошибка при редактировании.");
-          return;
+        console.error("Не удалось определить дату события.");
+        message.error("Ошибка при редактировании.");
+        return;
       }
 
       // Получаем список событий для этой даты и обновляем событие с заданным ID
       const updatedEvents = calendarData[date].map((event) =>
-          event.eventId === editingEventId
-              ? { ...event, content: editingEventContent }
-              : event
+        event.eventId === editingEventId
+          ? { ...event, content: editingEventContent }
+          : event
       );
 
       // Получаем список событий для следующей даты (через 30 дней)
-      const nextDate = moment(date).add(30, 'days').format("YYYY-MM-DD");
-      const updatedEventsForNextDate = (calendarData[nextDate] || []).map((event) =>
+      const nextDate = moment(date).add(30, "days").format("YYYY-MM-DD");
+      const updatedEventsForNextDate = (calendarData[nextDate] || []).map(
+        (event) =>
           event.eventId === editingEventId
-              ? { ...event, content: editingEventContent }
-              : event
+            ? { ...event, content: editingEventContent }
+            : event
       );
 
       // Обновление данных в Firestore и обрабатываем успешное выполнение
       Promise.all([
-          setDoc(doc(db, "calendarEvents", date), { events: updatedEvents }),
-          setDoc(doc(db, "calendarEvents", nextDate), { events: updatedEventsForNextDate }),
-          updateDoc(doc(db, "tableData", editingEventId), {
-              content: editingEventContent,
-          }),
+        setDoc(doc(db, "calendarEvents", date), { events: updatedEvents }),
+        setDoc(doc(db, "calendarEvents", nextDate), {
+          events: updatedEventsForNextDate,
+        }),
+        updateDoc(doc(db, "tableData", editingEventId), {
+          content: editingEventContent,
+        }),
       ])
-          .then(() => {
-              console.log("Данные успешно обновлены в Firestore");
-          })
-          .catch((error) => {
-              console.error("Ошибка при обновлении данных в Firestore:", error);
-              message.error("Ошибка при обновлении данных в Firestore");
-          });
+        .then(() => {
+          console.log("Данные успешно обновлены в Firestore");
+        })
+        .catch((error) => {
+          console.error("Ошибка при обновлении данных в Firestore:", error);
+          message.error("Ошибка при обновлении данных в Firestore");
+        });
 
       // Обновление данных в tableData (если требуется)
       const updatedTableData = tableData.map((item) =>
-          item.eventId === editingEventId
-              ? { ...item, tableContent: editingEventContent }
-              : item
+        item.eventId === editingEventId
+          ? { ...item, tableContent: editingEventContent }
+          : item
       );
       setTableData(updatedTableData);
 
@@ -497,12 +442,10 @@ const handleEditOk = () => {
       setEditingEventId(null);
       setEditingEventContent("");
       setEditModalVisible(false);
-  } else {
+    } else {
       message.error("Содержимое не может быть пустым");
-  }
-};
-
-
+    }
+  };
 
   // Обработчик закрытия модального окна (handleModalCancel): Очищает поле ввода и скрывает модальное окно.
   const handleModalCancel = () => {
@@ -517,7 +460,6 @@ const handleEditOk = () => {
     setInputValue(e.target.value);
   };
 
-
   const cellRender = (value) => {
     const date = value.format("YYYY-MM-DD");
     const events = calendarData[date];
@@ -526,14 +468,14 @@ const handleEditOk = () => {
         {events && events.length > 0 ? (
           <ul className="events">
             {events.map((event, index) => (
-              <li key={index}>
+               <li key={index} style={{ color: event.color }}>
                 {event.isCloned ? (
                   <PlusCircleOutlined
-                    style={{ color: "rgb(255 95 97)", marginRight: 8 }}
+                    style={{ color: "rgb(255 95 97)", marginRight: 5, fontSize: "11px" }}
                   /> // Иконка плюса для клонированного события
                 ) : (
                   <MinusCircleOutlined
-                    style={{ color: "#02aaff", marginRight: 8 }}
+                    style={{ color: "#0da51a", marginRight: 5, fontSize: "11px" }}
                   />
                 )}
                 <span>{event.content}</span>
@@ -703,7 +645,9 @@ const handleEditOk = () => {
                   cellRender={cellRender}
                 />
                 <Modal
-                  title={`Добавление записи на ${selectedDate ? selectedDate.format("DD.MM.YYYY") : ""}`}
+                  title={`Добавление записи на ${
+                    selectedDate ? selectedDate.format("DD.MM.YYYY") : ""
+                  }`}
                   centered
                   visible={isModalVisible}
                   onOk={handleModalOk}
@@ -713,7 +657,18 @@ const handleEditOk = () => {
                     placeholder="Введите текст"
                     value={inputValue}
                     onChange={handleInputChange}
+                     style={{ marginBottom: '20px' }} 
                   />
+                
+        
+
+<Circle
+      colors={[ '#EB144C', '#FE9200', '#00D084', '#DBDF00', '#0693E3',  '#9c27b0', '#3f51b5', '#7BDCB5', '#ffc107', '#ABB8C3', '#F78DA7',]}
+      color={eventColor}
+      onChange={(color) => {
+        setEventColor(color.hex);
+      }}
+    />
                 </Modal>
                 <Modal
                   title={"Редактирование записи"}
@@ -726,6 +681,7 @@ const handleEditOk = () => {
                     placeholder="Введите текст"
                     value={editingEventContent}
                     onChange={handleEditInputChange}
+                    style={{ marginBottom: '10px' }}
                   />
                 </Modal>
               </div>
