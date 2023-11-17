@@ -72,19 +72,19 @@ const App = () => {
       render: (text, record, index) => index + 1,
     },
     {
-      title: "Дата взятия",
+      title: "Взятия",
       dataIndex: "tableStart",
       sorter: (a, b) =>
         moment(a.tableStart).unix() - moment(b.tableStart).unix(),
       render: (text) => (
         <div className="tableValue">
-          <MinusCircleOutlined style={{ marginRight: 5, color: "#0da51a"}} />
+          <MinusCircleOutlined style={{ marginRight: 5, color: "rgb(148 148 148)"}} />
           {moment(text).format("DD.MM.YYYY")}
         </div>
       ),
     },
     {
-      title: "Дата погашения",
+      title: "Погашения",
       dataIndex: "tableEnd",
       sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
       render: (text) => (
@@ -101,12 +101,12 @@ const App = () => {
       dataIndex: "tableContent",
     },
     {
-      title: "Действие",
+      title: "Операция",
       dataIndex: "tableControl",
       render: (_, record) => (
         <div className="table-action">
           <Button
-            type="primary"
+           
             size="small"
             onClick={() => handleEdit(record.eventId, record.tableContent)}
           >
@@ -119,10 +119,8 @@ const App = () => {
             cancelText="Отмена"
           >
             <Button
-              type="primary"
               size="small"
               danger
-              style={{ marginRight: 8 }}
             >
               <DeleteOutlined />
             </Button>
@@ -342,7 +340,7 @@ const App = () => {
         : [{ eventId, content: inputValue,  color: eventColor}];
       const nextDate = selectedDate
         .clone()
-        .add(30, "days")
+        .add(29, "days")
         .format("YYYY-MM-DD");
 
       // Записываем данные в Firestore и обрабатываем успешное выполнение
@@ -403,8 +401,8 @@ const App = () => {
           : event
       );
 
-      // Получаем список событий для следующей даты (через 30 дней)
-      const nextDate = moment(date).add(30, "days").format("YYYY-MM-DD");
+      // Получаем список событий для следующей даты (через 29 дней)
+      const nextDate = moment(date).add(29, "days").format("YYYY-MM-DD");
       const updatedEventsForNextDate = (calendarData[nextDate] || []).map(
         (event) =>
           event.eventId === editingEventId
@@ -471,11 +469,11 @@ const App = () => {
                <li key={index} style={{ color: event.color }}>
                 {event.isCloned ? (
                   <PlusCircleOutlined
-                    style={{ color: "rgb(255 95 97)", marginRight: 5, fontSize: "11px" }}
+                    style={{ color: "#FF2400", marginRight: 5, fontSize: "11px" }}
                   /> // Иконка плюса для клонированного события
                 ) : (
                   <MinusCircleOutlined
-                    style={{ color: "#0da51a", marginRight: 5, fontSize: "11px" }}
+                    style={{ color: "rgb(148 148 148)", marginRight: 5, fontSize: "11px" }}
                   />
                 )}
                 <span>{event.content}</span>
@@ -636,8 +634,8 @@ const App = () => {
           </div>
         </Header>
         <Content className="content">
-          <Row>
-            <Col span={15} style={{ paddingRight: "10px" }}>
+          <Row gutter={20}>
+            <Col md={15} >
               <div className="сalendar-wrapper">
                 <Calendar
                   onPanelChange={onPanelChange}
@@ -663,7 +661,7 @@ const App = () => {
         
 
 <Circle
-      colors={[ '#EB144C', '#FE9200', '#00D084', '#DBDF00', '#0693E3',  '#9c27b0', '#3f51b5', '#7BDCB5', '#ffc107', '#ABB8C3', '#F78DA7',]}
+      colors={[ '#FF2400', '#008000',]}
       color={eventColor}
       onChange={(color) => {
         setEventColor(color.hex);
@@ -686,15 +684,18 @@ const App = () => {
                 </Modal>
               </div>
             </Col>
-            <Col span={9}>
+            <Col md={9} >
               <div className="table-wrapper">
                 <Table
+                  size="small"
                   columns={columns}
                   dataSource={tableData.map((item, index) => ({
                     ...item,
                     key: item.tableStart + index,
                   }))}
+                   pagination={{ pageSize: 17 }} 
                 />
+                
               </div>
             </Col>
           </Row>

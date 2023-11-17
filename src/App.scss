@@ -48,7 +48,7 @@ box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90
 
 .content {
   height: 100%;
-  padding: 10px;
+  padding: 20px;
 }
 
 
@@ -150,7 +150,16 @@ box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90
   display: flex;
   align-items: center;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.ant-picker-calendar-date-value {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ant-table-cell {
+  font-size: 12px;
 }
 
 /* Стили для статуса "error" (красный) */
@@ -170,7 +179,7 @@ box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90
 }
 
 .events li {
-font-size: 12px;
+font-size: 11px;
 line-height: 18px;
 font-weight: 500;
 }

@@ -5,7 +5,6 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import logoImage from "./assets/logo.png";
-import { useCallback } from "react";
 import { initializeApp } from "firebase/app";
 
 import "firebase/auth";
