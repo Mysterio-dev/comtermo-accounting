@@ -208,7 +208,9 @@ const App = () => {
   const [editingEventContent, setEditingEventContent] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
 
-  const [eventColor, setEventColor] = useState("rgba(0, 0, 0, 0.88)"); // можно установить любой цвет по умолчанию
+  const [eventColor, setEventColor] = useState("rgba(0, 0, 0, 0.88)"); 
+  const [initialColor, setInitialColor] = useState("rgba(0, 0, 0, 0.88)");
+  
 
 
   const handleDelete = async (eventId) => {
@@ -371,6 +373,8 @@ const App = () => {
     }
     setInputValue("");
     setIsModalVisible(false);
+    
+        setEventColor(initialColor);
   };
 
   const findDateByEventId = (data, eventId) => {
@@ -443,6 +447,9 @@ const App = () => {
     } else {
       message.error("Содержимое не может быть пустым");
     }
+
+     // Сброс цвета к начальному
+  setEventColor(initialColor);
   };
 
   // Обработчик закрытия модального окна (handleModalCancel): Очищает поле ввода и скрывает модальное окно.
