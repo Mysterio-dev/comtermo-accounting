@@ -285,18 +285,20 @@ const App = () => {
       const tableDataRef = collection(db, "tableData");
 
       // Установка слушателя для событий календаря
-      const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
-        const newCalendarData = {};
-        snapshot.forEach((doc) => {
-          newCalendarData[doc.id] = doc.data().events.map((event) => {
-            return {
-              ...event,
-              isCloned: event.isCloned || false,
-            };
-          });
-        });
-        setCalendarData(newCalendarData);
-      });
+ const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
+  const newCalendarData = {};
+  snapshot.forEach((doc) => {
+    const eventsData = doc.data()?.events || []; // Проверка наличия свойства events
+    newCalendarData[doc.id] = eventsData.map((event) => {
+      return {
+        ...event,
+        isCloned: event.isCloned || false,
+      };
+    });
+  });
+  setCalendarData(newCalendarData);
+});
+
 
       // Установка слушателя для данных таблицы
       const tableUnsubscribe = onSnapshot(tableDataRef, (snapshot) => {
@@ -501,10 +503,11 @@ const App = () => {
     const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
       const newCalendarData = {};
       snapshot.forEach((doc) => {
-        newCalendarData[doc.id] = doc.data().events.map((event) => {
+        const eventData = doc.data()?.events || []; // Проверка наличия свойства events
+        newCalendarData[doc.id] = eventData.map((event) => {
           return {
             ...event,
-            isCloned: event.isCloned || false,
+            isCloned: event?.isCloned || false,
           };
         });
       });
