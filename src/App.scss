@@ -66,7 +66,7 @@ box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90
     list-style: none;
 
     &:not(:last-child) {
-      margin-bottom: 2px;
+      margin-bottom: 4px;
     }
   }
 
@@ -180,6 +180,6 @@ box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgb(234 234 234 / 90
 
 .events li {
 font-size: 11px;
-line-height: 18px;
+line-height: normal;
 font-weight: 500;
 }
