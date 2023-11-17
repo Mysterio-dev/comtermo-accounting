@@ -75,7 +75,7 @@ const AuthComponent = ({ setIsLoggedIn }) => {
         const userDocRef = doc(db, "users", user.uid);
         await setDoc(userDocRef, { lastLoginTime: new Date() }, { merge: true });
 
-        antdMessage.success("Вход выполнен успешно!");
+       
       })
       .catch((error) => {
         console.error("Ошибка входа:", error);
@@ -130,14 +130,6 @@ const AuthComponent = ({ setIsLoggedIn }) => {
             <Input.Password />
           </Form.Item>
 
-          <Form.Item>
-            <Checkbox
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            >
-              Запомнить меня
-            </Checkbox>
-          </Form.Item>
 
           <Form.Item>
             <Button
