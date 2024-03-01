@@ -97,11 +97,11 @@ const App = () => {
       ),
     },
     {
-      title: "Сумма или комментарий",
+      title: "Сумма",
       dataIndex: "tableContent",
     },
     {
-      title: "Операция",
+      title: "Действие",
       dataIndex: "tableControl",
       render: (_, record) => (
         <div className="table-action">
@@ -194,6 +194,7 @@ const App = () => {
     }
   };
 
+  
   // Здесь объявляются состояния для управления выбранной датой, модальным окном, вводимым значением, данными календаря и уведомлениями, а также для управления выделенными строками в таблице.
   const [selectedDate, setSelectedDate] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -671,7 +672,7 @@ const App = () => {
         
 
 <Circle
-      colors={[ '#FF2400', '#008000',]}
+      colors={[ '#FF2400', '#008000', '#0094ff' ]}
       color={eventColor}
       onChange={(color) => {
         setEventColor(color.hex);
