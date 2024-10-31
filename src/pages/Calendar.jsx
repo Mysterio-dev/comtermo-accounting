@@ -640,7 +640,7 @@ const App = () => {
           <div className="header__logo">
             <img src={logoImage} alt="Логотип" />
             <h3>
-              Comtermo<span> - календарь</span>
+            Календарь<span> - кредита</span>
             </h3>
           </div>
         </Header>
@@ -672,7 +672,7 @@ const App = () => {
         
 
 <Circle
-      colors={[ '#FF2400', '#008000', '#0094ff' ]}
+      colors={[ '#FF2400', '#008000', '#0094ff', '#cc00ff' ]}
       color={eventColor}
       onChange={(color) => {
         setEventColor(color.hex);

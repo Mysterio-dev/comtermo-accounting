@@ -95,7 +95,7 @@ const AuthComponent = ({ setIsLoggedIn }) => {
           <img src={logoImage} alt="Логотип" />
         </div>
         <h3 className="authContainer__title">
-          Comtermo<span> - календарь</span>
+        Календарь <span>кредита</span> 
         </h3>
         <Form
           name="login"
