@@ -612,7 +612,7 @@ const App = () => {
     notification.warning({
       message: "Предстоящее событие",
       description: notificationMessage,
-      duration: 0,
+      duration: 5,
       placement: "topLeft",
     });
   };
