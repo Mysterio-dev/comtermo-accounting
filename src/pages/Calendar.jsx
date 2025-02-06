@@ -672,7 +672,7 @@ const App = () => {
         
 
 <Circle
-      colors={[ '#FF2400', '#008000', '#0094ff', '#bc00eb' ]}
+      colors={[ '#FF2400', '#008000', '#0094ff', '#bc00eb', '#0022e2', '#e68200' ]}
       color={eventColor}
       onChange={(color) => {
         setEventColor(color.hex);
