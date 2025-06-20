@@ -704,7 +704,7 @@ const App = () => {
                     ...item,
                     key: item.tableStart + index,
                   }))}
-                   pagination={{ pageSize: 17 }} 
+                   pagination={{ pageSize: 200 }} 
                 />
                 
               </div>
