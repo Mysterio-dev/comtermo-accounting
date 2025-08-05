@@ -12,17 +12,23 @@ import {
   Popconfirm,
   Layout,
   Typography,
+  theme
 } from "antd";
 
 
+import { Badge } from "antd";
 import Circle from '@uiw/react-color-circle';
 const { Header, Footer, Content } = Layout; // Деструктурируйте компоненты Layout
 const { Text } = Typography;
 import {
   MinusCircleOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
   PlusCircleOutlined,
   EditOutlined,
   DeleteOutlined,
+  DeleteFilled,
+  EditTwoTone
 } from "@ant-design/icons";
 import { Col, Row } from "antd";
 import moment from "moment";
@@ -74,28 +80,51 @@ const App = () => {
     {
       title: "Взятия",
       dataIndex: "tableStart",
-      sorter: (a, b) =>
-        moment(a.tableStart).unix() - moment(b.tableStart).unix(),
+      sorter: (a, b) => moment(a.tableStart).unix() - moment(b.tableStart).unix(),
       render: (text) => (
         <div className="tableValue">
-          <MinusCircleOutlined style={{ marginRight: 5, color: "rgb(148 148 148)"}} />
+          <ArrowDownOutlined style={{ marginRight: 5, color: "#FF2400", fontSize: "15px", }} />
           {moment(text).format("DD.MM.YYYY")}
         </div>
       ),
     },
+    // {
+    //   title: "Погашения",
+    //   dataIndex: "tableEnd",
+    //   sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
+    //   render: (text) => (
+    //     <div className="tableValue">
+    //       <ArrowUpOutlined
+    //         style={{ marginRight: 5, color: "#00CC00", fontSize: "15px", }}
+    //       />
+    //       {moment(text).format("DD.MM.YYYY")}
+    //     </div>
+    //   ),
+    // },
     {
       title: "Погашения",
       dataIndex: "tableEnd",
       sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
-      render: (text) => (
-        <div className="tableValue">
-          <PlusCircleOutlined
-            style={{ marginRight: 5, color: "rgb(255 95 97)" }}
-          />
-          {moment(text).format("DD.MM.YYYY")}
-        </div>
-      ),
+      render: (text) => {
+        const isToday = moment(text).isSame(moment(), "day");
+        return (
+          <div className="tableValue" style={{ display: "flex", alignItems: "center" }}>
+            <ArrowUpOutlined
+              style={{ marginRight: 5, color: "#00CC00", fontSize: "15px", }}
+            />
+            <span>{moment(text).format("DD.MM.YYYY")}</span>
+            {isToday && (
+              <div className="pulse-animation" style={{ marginLeft: "8px", }}>
+                <Badge status="error" />
+              </div>
+            )}
+          </div>
+        );
+      },
     },
+
+
+
     {
       title: "Сумма",
       dataIndex: "tableContent",
@@ -106,11 +135,11 @@ const App = () => {
       render: (_, record) => (
         <div className="table-action">
           <Button
-           
+
             size="small"
             onClick={() => handleEdit(record.eventId, record.tableContent)}
           >
-            <EditOutlined />
+       <EditTwoTone />
           </Button>
           <Popconfirm
             title="Вы действительно хотите удалить эту запись?"
@@ -122,7 +151,7 @@ const App = () => {
               size="small"
               danger
             >
-              <DeleteOutlined />
+             <DeleteFilled />
             </Button>
           </Popconfirm>
         </div>
@@ -194,7 +223,7 @@ const App = () => {
     }
   };
 
-  
+
   // Здесь объявляются состояния для управления выбранной датой, модальным окном, вводимым значением, данными календаря и уведомлениями, а также для управления выделенными строками в таблице.
   const [selectedDate, setSelectedDate] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -209,9 +238,9 @@ const App = () => {
   const [editingEventContent, setEditingEventContent] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
 
-  const [eventColor, setEventColor] = useState("rgba(0, 0, 0, 0.88)"); 
+  const [eventColor, setEventColor] = useState("rgba(0, 0, 0, 0.88)");
   const [initialColor, setInitialColor] = useState("rgba(0, 0, 0, 0.88)");
-  
+
 
 
   const handleDelete = async (eventId) => {
@@ -269,7 +298,7 @@ const App = () => {
         return newData;
       });
 
-      message.success("События успешно удалены!");
+      message.success("Запись удалена");
     } catch (error) {
       console.error("Ошибка при удалении событий из Firestore:", error);
       message.error("Ошибка при удалении событий из Firestore");
@@ -286,19 +315,19 @@ const App = () => {
       const tableDataRef = collection(db, "tableData");
 
       // Установка слушателя для событий календаря
- const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
-  const newCalendarData = {};
-  snapshot.forEach((doc) => {
-    const eventsData = doc.data()?.events || []; // Проверка наличия свойства events
-    newCalendarData[doc.id] = eventsData.map((event) => {
-      return {
-        ...event,
-        isCloned: event.isCloned || false,
-      };
-    });
-  });
-  setCalendarData(newCalendarData);
-});
+      const calendarUnsubscribe = onSnapshot(calendarDataRef, (snapshot) => {
+        const newCalendarData = {};
+        snapshot.forEach((doc) => {
+          const eventsData = doc.data()?.events || []; // Проверка наличия свойства events
+          newCalendarData[doc.id] = eventsData.map((event) => {
+            return {
+              ...event,
+              isCloned: event.isCloned || false,
+            };
+          });
+        });
+        setCalendarData(newCalendarData);
+      });
 
 
       // Установка слушателя для данных таблицы
@@ -341,22 +370,43 @@ const App = () => {
       const eventId = Date.now().toString();
       const date = selectedDate.format("YYYY-MM-DD");
       const eventsForDate = calendarData[date]
-        ? [...calendarData[date], { eventId, content: inputValue,  color: eventColor }]
-        : [{ eventId, content: inputValue,  color: eventColor}];
+        ? [...calendarData[date], { eventId, content: inputValue, color: eventColor }]
+        : [{ eventId, content: inputValue, color: eventColor }];
       const nextDate = selectedDate
         .clone()
         .add(29, "days")
         .format("YYYY-MM-DD");
 
       // Записываем данные в Firestore и обрабатываем успешное выполнение
+      // Promise.all([
+      //   setDoc(doc(db, "calendarEvents", date), { events: eventsForDate }),
+      //   setDoc(doc(db, "calendarEvents", nextDate), {
+      //     events: eventsForDate.map((event) => {
+      //       return { ...event, isCloned: true };
+      //     }),
+      //   }),
+
+      //   setDoc(doc(db, "tableData", eventId), {
+      //     startDate: date,
+      //     endDate: nextDate,
+      //     content: inputValue,
+      //   }),
+      // ])
+      //   .then(() => {
+      //     console.log("Данные успешно записаны в Firestore");
+      //     addNotificationToFirestore(eventId, inputValue, date, true);
+      //   })
+      //   .catch((error) => {
+      //     console.error("Ошибка при записи данных в Firestore:", error);
+      //     message.error("Ошибка при записи данных в Firestore");
+      //   });
+
+
       Promise.all([
         setDoc(doc(db, "calendarEvents", date), { events: eventsForDate }),
         setDoc(doc(db, "calendarEvents", nextDate), {
-          events: eventsForDate.map((event) => {
-            return { ...event, isCloned: true };
-          }),
+          events: eventsForDate.map((event) => ({ ...event, isCloned: true })),
         }),
-
         setDoc(doc(db, "tableData", eventId), {
           startDate: date,
           endDate: nextDate,
@@ -371,13 +421,12 @@ const App = () => {
           console.error("Ошибка при записи данных в Firestore:", error);
           message.error("Ошибка при записи данных в Firestore");
         });
-
-      message.success("Данные успешно добавлены!");
+      message.success("Запись добавлена!");
     }
     setInputValue("");
     setIsModalVisible(false);
-    
-        setEventColor(initialColor);
+
+    setEventColor(initialColor);
   };
 
   const findDateByEventId = (data, eventId) => {
@@ -451,8 +500,8 @@ const App = () => {
       message.error("Содержимое не может быть пустым");
     }
 
-     // Сброс цвета к начальному
-  setEventColor(initialColor);
+    // Сброс цвета к начальному
+    setEventColor(initialColor);
   };
 
   // Обработчик закрытия модального окна (handleModalCancel): Очищает поле ввода и скрывает модальное окно.
@@ -468,27 +517,55 @@ const App = () => {
     setInputValue(e.target.value);
   };
 
+  // const cellRender = (value) => {
+  //   const date = value.format("YYYY-MM-DD");
+  //   const events = calendarData[date];
+  //   return (
+  //     <div>
+  //       {events && events.length > 0 ? (
+  //         <ul className="events">
+  //           {events.map((event, index) => (
+  //              <li key={index} style={{ color: event.color }}>
+  //               {event.isCloned ? (
+  //                 <PlusCircleOutlined
+  //                   style={{ color: "#FF2400", marginRight: 5, fontSize: "11px" }}
+  //                 /> // Иконка плюса для клонированного события
+  //               ) : (
+  //                 <MinusCircleOutlined
+  //                   style={{ color: "rgb(148 148 148)", marginRight: 5, fontSize: "11px" }}
+  //                 />
+  //               )}
+  //               <span>{event.content}</span>
+  //             </li>
+  //           ))}
+  //         </ul>
+  //       ) : null}
+  //     </div>
+  //   );
+  // };
+
   const cellRender = (value) => {
     const date = value.format("YYYY-MM-DD");
     const events = calendarData[date];
+
     return (
       <div>
         {events && events.length > 0 ? (
           <ul className="events">
-            {events.map((event, index) => (
-               <li key={index} style={{ color: event.color }}>
-                {event.isCloned ? (
-                  <PlusCircleOutlined
-                    style={{ color: "#FF2400", marginRight: 5, fontSize: "11px" }}
-                  /> // Иконка плюса для клонированного события
-                ) : (
-                  <MinusCircleOutlined
-                    style={{ color: "rgb(148 148 148)", marginRight: 5, fontSize: "11px" }}
-                  />
-                )}
-                <span>{event.content}</span>
-              </li>
-            ))}
+            {events
+              .filter((event) => !event.isCloned) // Отфильтровываем клонированные события
+              .map((event, index) => (
+                <li key={index} style={{ color: event.color }}>
+                  {/* <ArrowDownOutlined
+                    style={{
+                      color: "#FF2400",
+                      marginRight: 5,
+                      fontSize: "12px",
+                    }}
+                  /> */}
+                  <span>{event.content}</span>
+                </li>
+              ))}
           </ul>
         ) : null}
       </div>
@@ -634,13 +711,14 @@ const App = () => {
   };
 
   return (
-    <ConfigProvider locale={ruRU}>
+    <ConfigProvider locale={ruRU}
+    >
       <Layout style={{ minHeight: "100vh" }}>
         <Header className="header">
           <div className="header__logo">
             <img src={logoImage} alt="Логотип" />
             <h3>
-            Календарь<span> - кредита</span>
+              Календарь<span> - кредита</span>
             </h3>
           </div>
         </Header>
@@ -654,9 +732,8 @@ const App = () => {
                   cellRender={cellRender}
                 />
                 <Modal
-                  title={`Добавление записи на ${
-                    selectedDate ? selectedDate.format("DD.MM.YYYY") : ""
-                  }`}
+                  title={`Добавление записи на ${selectedDate ? selectedDate.format("DD.MM.YYYY") : ""
+                    }`}
                   centered
                   visible={isModalVisible}
                   onOk={handleModalOk}
@@ -666,18 +743,18 @@ const App = () => {
                     placeholder="Введите текст"
                     value={inputValue}
                     onChange={handleInputChange}
-                     style={{ marginBottom: '20px' }} 
+                    style={{ marginBottom: '20px' }}
                   />
-                
-        
 
-<Circle
-      colors={[ '#FF2400', '#008000', '#0094ff', '#bc00eb', '#0022e2', '#e4860b' ]}
-      color={eventColor}
-      onChange={(color) => {
-        setEventColor(color.hex);
-      }}
-    />
+
+
+                  <Circle
+                    colors={['#FF2400', '#008000', '#0094ff', '#bc00eb', '#0022e2', '#e4860b']}
+                    color={eventColor}
+                    onChange={(color) => {
+                      setEventColor(color.hex);
+                    }}
+                  />
                 </Modal>
                 <Modal
                   title={"Редактирование записи"}
@@ -697,16 +774,29 @@ const App = () => {
             </Col>
             <Col md={9} >
               <div className="table-wrapper">
-                <Table
+                {/* <Table
                   size="small"
                   columns={columns}
                   dataSource={tableData.map((item, index) => ({
                     ...item,
                     key: item.tableStart + index,
                   }))}
-                   pagination={{ pageSize: 200 }} 
+                  pagination={{ pageSize: 200 }}
+                /> */}
+
+                <Table
+                  size="small"
+                  columns={columns}
+                  dataSource={tableData.map((item, index) => ({
+                    ...item,
+                    key: item.eventId || index, // Уникальный ключ для каждой строки
+                  }))}
+                  pagination={{
+                    pageSize: 12,
+                    showTotal: (total, range) =>
+                      `${range[0]}-${range[1]} из ${total} записей`,
+                  }}
                 />
-                
               </div>
             </Col>
           </Row>
