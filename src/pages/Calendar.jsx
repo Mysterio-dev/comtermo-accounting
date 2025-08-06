@@ -101,28 +101,55 @@ const App = () => {
     //     </div>
     //   ),
     // },
+    // {
+    //   title: "Погашения",
+    //   dataIndex: "tableEnd",
+    //   sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
+    //   render: (text) => {
+    //     const isToday = moment(text).isSame(moment(), "day");
+    //     return (
+    //       <div className="tableValue" style={{ display: "flex", alignItems: "center" }}>
+    //         <ArrowUpOutlined
+    //           style={{ marginRight: 5, color: "#00CC00", fontSize: "15px", }}
+    //         />
+    //         <span>{moment(text).format("DD.MM.YYYY")}</span>
+    //         {isToday && (
+    //           <div className="pulse-animation" style={{ marginLeft: "8px", }}>
+    //             <Badge status="error" />
+    //           </div>
+    //         )}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Погашения",
       dataIndex: "tableEnd",
       sorter: (a, b) => moment(a.tableEnd).unix() - moment(b.tableEnd).unix(),
       render: (text) => {
-        const isToday = moment(text).isSame(moment(), "day");
+        const isToday = moment(text).isSame(moment(), "day"); // Проверка, является ли дата сегодняшней
+        const isNearFuture = moment(text).isAfter(moment()) && moment(text).diff(moment(), "days") <= 3; // Проверка, близка ли дата
+
         return (
           <div className="tableValue" style={{ display: "flex", alignItems: "center" }}>
             <ArrowUpOutlined
-              style={{ marginRight: 5, color: "#00CC00", fontSize: "15px", }}
+              style={{ marginRight: 5, color: "#00CC00", fontSize: "15px" }}
             />
             <span>{moment(text).format("DD.MM.YYYY")}</span>
             {isToday && (
-              <div className="pulse-animation" style={{ marginLeft: "8px", }}>
+              <div className="pulse-animation" style={{ marginLeft: "8px" }}>
                 <Badge status="error" />
+              </div>
+            )}
+            {isNearFuture && (
+              <div className="yellow-pulse-animation" style={{ marginLeft: "8px" }}>
+                <Badge status="warning" />
               </div>
             )}
           </div>
         );
       },
     },
-
 
 
     {
@@ -139,7 +166,7 @@ const App = () => {
             size="small"
             onClick={() => handleEdit(record.eventId, record.tableContent)}
           >
-       <EditTwoTone />
+            <EditTwoTone />
           </Button>
           <Popconfirm
             title="Вы действительно хотите удалить эту запись?"
@@ -151,7 +178,7 @@ const App = () => {
               size="small"
               danger
             >
-             <DeleteFilled />
+              <DeleteFilled />
             </Button>
           </Popconfirm>
         </div>
@@ -795,6 +822,11 @@ const App = () => {
                     pageSize: 12,
                     showTotal: (total, range) =>
                       `${range[0]}-${range[1]} из ${total} записей`,
+                  }}
+
+                  rowClassName={(record) => {
+                    const isOverdue = moment(record.tableEnd).isBefore(moment(), "day"); // Проверка на просроченность
+                    return isOverdue ? "overdue-row" : ""; // Возвращаем класс для просроченных строк
                   }}
                 />
               </div>
